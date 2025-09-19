@@ -1,0 +1,7 @@
+{
+  "name": "eonet-monitor",
+  "version": "1.0.0",
+  "dependencies": {
+    "date-fns": "^3.6.0"
+  }
+}
