@@ -19,7 +19,7 @@ app.post('/api/historico', async (req, res) => {
   try {
     const novo = await prisma.historico.create({ data: { termo } });
     res.json(novo);
-  } catch (err) {
+  } catch (err) {console.error(err);
     res.status(500).json({ erro: err.message });
   }
 });
@@ -27,10 +27,38 @@ app.post('/api/historico', async (req, res) => {
 // READ - listar histórico
 app.get('/api/historico', async (req, res) => {
   try {
-    const lista = await prisma.historico.findMany({
-      orderBy: { data: 'desc' }
+    const historico = await prisma.historico.findMany({
+      orderBy: { createdAt: 'desc' }
     });
-    res.json(lista);
+    res.json(historico);
+  } catch (err) {console.error(err);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// Atualizar termo (opcional)
+app.put("/api/historico/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { termo } = req.body;
+    const atualizado = await prisma.historico.update({
+      where: { id: parseInt(id) },
+      data: { termo },
+    });
+    res.json(atualizado);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// Deletar termo
+app.delete("/api/historico/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.historico.delete({
+      where: { id: parseInt(id) },
+    });
+    res.json({ mensagem: "Registro deletado com sucesso" });
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }

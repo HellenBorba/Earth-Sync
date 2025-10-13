@@ -10,5 +10,5 @@ datasource db {
 model Historico {
   id    Int      @id @default(autoincrement())
   termo String
-  data  DateTime @default(now())
+   createdAt  DateTime @default(now())
 }
