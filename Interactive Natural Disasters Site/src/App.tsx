@@ -1,3 +1,5 @@
+//import HistoricoPesquisas from "./HistoricoPesquisas";
+
 import { getEvents } from "./api/events";
 import { useState, useEffect } from "react";
 import { EventList } from "./components/EventList";
@@ -383,7 +385,7 @@ const fetchEvents = async () => {
                 <div className="xl:col-span-2 space-y-4 sm:space-y-6">
                   <Tabs
                     value={activeTab}
-                    onValueChange={(value) =>
+                    onValueChange={(value: string) =>
                       setActiveTab(value as "list" | "map")
                     }
                   >
@@ -529,4 +531,5 @@ const fetchEvents = async () => {
       <ResponsiveDemo>{appContent}</ResponsiveDemo>
     </>
   );
+
 }
