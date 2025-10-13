@@ -3,6 +3,7 @@
       "version": "0.1.0",
       "private": true,
       "dependencies": {
+            "@prisma/client": "^6.17.1",
             "@radix-ui/react-accordion": "^1.2.3",
             "@radix-ui/react-alert-dialog": "^1.1.6",
             "@radix-ui/react-aspect-ratio": "^1.1.2",
@@ -33,6 +34,7 @@
             "clsx": "*",
             "cmdk": "^1.1.1",
             "embla-carousel-react": "^8.6.0",
+            "express": "^5.1.0",
             "input-otp": "^1.4.2",
             "lucide-react": "^0.487.0",
             "react": "^18.3.1",
@@ -50,6 +52,7 @@
             "@types/react": "^19.1.13",
             "@types/react-dom": "^19.1.9",
             "@vitejs/plugin-react-swc": "^3.10.2",
+            "prisma": "^6.17.1",
             "vite": "6.3.5"
       },
       "scripts": {
