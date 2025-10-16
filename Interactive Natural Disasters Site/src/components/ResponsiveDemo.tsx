@@ -29,7 +29,7 @@ export function ResponsiveDemo({ children }: ResponsiveDemoProps) {
       <div className="fixed bottom-4 right-4 z-50">
         <Card className="p-3 bg-slate-900/95 border-slate-700/50 backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <Button
+            {/*<Button
               size="sm"
               variant="ghost"
               onClick={() => setViewMode('mobile')}
@@ -37,7 +37,7 @@ export function ResponsiveDemo({ children }: ResponsiveDemoProps) {
             >
               <Eye className="w-4 h-4 mr-1" />
               Ver Layout Responsivo
-            </Button>
+            </Button>*/}
           </div>
         </Card>
       </div>
