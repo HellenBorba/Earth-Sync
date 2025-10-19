@@ -4,11 +4,11 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:Hellen0507@localhost:3306/naza_trabalho2025"
 }
 
-model Historico {
-  id    Int      @id @default(autoincrement())
-  termo String
-   createdAt  DateTime @default(now())
+model searchHistory {
+  id        Int      @id @default(autoincrement())
+  query     String
+  createdAt DateTime @default(now())
 }
