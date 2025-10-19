@@ -21,21 +21,7 @@ declare type AccelerateEngineConfig = {
     accelerateUtils?: AccelerateUtils;
 };
 
-/**
- * A stripped down interface of `fetch` that `@prisma/extension-accelerate`
- * relies on. It must be in sync with the corresponding definition in the
- * Accelerate extension.
- *
- * This is the actual interface exposed by the extension. We can't use the
- * custom fetch function provided by it as normal fetch because the API is
- * different. Notably, `headers` must be an object and not a `Headers`
- * instance, and `url` must be a `string` and not a `URL`.
- *
- * The return type is `Response` but we can't specify this in an exported type
- * because it would end up referencing external types from `@types/node` or DOM
- * which can fail typechecking depending on TypeScript configuration in a user's
- * project.
- */
+
 declare type AccelerateExtensionFetch = (url: string, options: {
     body?: string;
     method?: string;
@@ -50,10 +36,7 @@ export declare type Action = keyof typeof DMMF_2.ModelAction | 'executeRaw' | 'q
 
 declare type ActiveConnectorType = Exclude<ConnectorType, 'postgres' | 'prisma+postgres'>;
 
-/**
- * An interface that exposes some basic information about the
- * adapter like its name and provider type.
- */
+
 declare interface AdapterInfo {
     readonly provider: Provider;
     readonly adapterName: (typeof officialPrismaAdapters)[number] | (string & {});
@@ -250,13 +233,7 @@ declare type CompilerWasmLoadingConfig = {
         __wbg_set_wasm(exports: unknown): void;
         QueryCompiler: QueryCompilerConstructor;
     }>;
-    /**
-     * Loads the raw wasm module for the wasm compiler engine. This configuration is
-     * generated specifically for each type of client, eg. Node.js client and Edge
-     * clients will have different implementations.
-     * @remarks this is a callback on purpose, we only load the wasm if needed.
-     * @remarks only used by ClientEngine
-     */
+    
     getQueryCompilerWasmModule: () => Promise<unknown>;
 };
 
@@ -287,26 +264,11 @@ declare type ConnectionInfo = {
 declare type ConnectorType = 'mysql' | 'mongodb' | 'sqlite' | 'postgresql' | 'postgres' | 'prisma+postgres' | 'sqlserver' | 'cockroachdb';
 
 declare interface Context {
-    /**
-     * Get a value from the context.
-     *
-     * @param key key which identifies a context value
-     */
+   
     getValue(key: symbol): unknown;
-    /**
-     * Create a new context which inherits from this context and has
-     * the given key set to the given value.
-     *
-     * @param key context key for which to set the value
-     * @param value value to set for the given key
-     */
+   
     setValue(key: symbol, value: unknown): Context;
-    /**
-     * Return a new context which inherits from this context but does
-     * not contain a value for the given key.
-     *
-     * @param key context key for which to clear a value
-     */
+   
     deleteValue(key: symbol): Context;
 }
 
@@ -406,13 +368,7 @@ export declare const Debug: typeof debugCreate & {
 
 /**
  * Create a new debug instance with the given namespace.
- *
- * @example
- * ```ts
- * import Debug from '@prisma/debug'
- * const debug = Debug('prisma:client')
- * debug('Hello World')
- * ```
+
  */
 declare function debugCreate(namespace: string): ((...args: any[]) => void) & {
     color: string;
@@ -431,7 +387,6 @@ export declare namespace Decimal {
     export type Modulo = Rounding | 9;
     export type Value = string | number | Decimal;
 
-    // http://mikemcl.github.io/decimal.js/#constructor-properties
     export interface Config {
         precision?: number;
         rounding?: Rounding;
@@ -1044,48 +999,26 @@ declare interface EngineConfig {
     activeProvider?: string;
     logEmitter: LogEmitter;
     transactionOptions: Transaction_2.Options;
-    /**
-     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`.
-     * If set, this is only used in the library engine, and all queries would be performed through it,
-     * rather than Prisma's Rust drivers.
-     * @remarks only used by LibraryEngine.ts
-     */
+    
     adapter?: SqlDriverAdapterFactory;
     /**
      * The contents of the schema encoded into a string
      */
     inlineSchema: string;
-    /**
-     * The contents of the datasource url saved in a string
-     * @remarks only used by DataProxyEngine.ts
-     * @remarks this field is used internally by Policy, do not rename or remove
-     */
+    
     inlineDatasources: GetPrismaClientConfig['inlineDatasources'];
-    /**
-     * The string hash that was produced for a given schema
-     * @remarks only used by DataProxyEngine.ts
-     */
+    
     inlineSchemaHash: string;
-    /**
-     * The helper for interaction with OTEL tracing
-     * @remarks enabling is determined by the client and @prisma/instrumentation package
-     */
+    
     tracingHelper: TracingHelper;
-    /**
-     * Information about whether we have not found a schema.prisma file in the
-     * default location, and that we fell back to finding the schema.prisma file
-     * in the current working directory. This usually means it has been bundled.
-     */
+    
     isBundled?: boolean;
     /**
      * Web Assembly module loading configuration
      */
     engineWasm?: EngineWasmLoadingConfig;
     compilerWasm?: CompilerWasmLoadingConfig;
-    /**
-     * Allows Accelerate to use runtime utilities from the client. These are
-     * necessary for the AccelerateEngine to function correctly.
-     */
+    
     accelerateUtils?: {
         resolveDatasourceUrl: typeof resolveDatasourceUrl;
         getBatchRequestPayload: typeof getBatchRequestPayload;
@@ -1126,13 +1059,7 @@ declare type EngineWasmLoadingConfig = {
         __wbg_set_wasm(exports: unknown): void;
         QueryEngine: QueryEngineConstructor;
     }>;
-    /**
-     * Loads the raw wasm module for the wasm query engine. This configuration is
-     * generated specifically for each type of client, eg. Node.js client and Edge
-     * clients will have different implementations.
-     * @remarks this is a callback on purpose, we only load the wasm if needed.
-     * @remarks only used by LibraryEngine
-     */
+    
     getQueryEngineWasmModule: () => Promise<unknown>;
 };
 
@@ -1332,13 +1259,10 @@ declare type Field = ReadonlyDeep_2<{
     isUpdatedAt?: boolean;
     /**
      * Describes the data type in the same the way it is defined in the Prisma schema:
-     * BigInt, Boolean, Bytes, DateTime, Decimal, Float, Int, JSON, String, $ModelName
      */
     type: string;
     /**
      * Native database type, if specified.
-     * For example, `@db.VarChar(191)` is encoded as `['VarChar', ['191']]`,
-     * `@db.Text` is encoded as `['Text', []]`.
      */
     nativeType?: [string, string[]] | null;
     dbName?: string | null;
@@ -1449,13 +1373,13 @@ declare interface GeneratorConfig {
     isCustomOutput?: boolean;
     provider: EnvValue;
     config: {
-        /** `output` is a reserved name and will only be available directly at `generator.output` */
+        
         output?: never;
-        /** `provider` is a reserved name and will only be available directly at `generator.provider` */
+       
         provider?: never;
-        /** `binaryTargets` is a reserved name and will only be available directly at `generator.binaryTargets` */
+        
         binaryTargets?: never;
-        /** `previewFeatures` is a reserved name and will only be available directly at `generator.previewFeatures` */
+       
         previewFeatures?: never;
     } & {
         [key: string]: string | string[] | undefined;
@@ -1540,9 +1464,7 @@ export declare function getPrismaClient(config: GetPrismaClientConfig): {
         _activeProvider: string;
         _globalOmit?: GlobalOmitOptions | undefined;
         _extensions: MergedExtensionsList;
-        /**
-         * @remarks This is used internally by Policy, do not rename or remove
-         */
+        
         _engine: Engine;
         /**
          * A fully constructed/applied Client that references the parent
@@ -1562,21 +1484,9 @@ export declare function getPrismaClient(config: GetPrismaClientConfig): {
         $executeRawInternal(transaction: PrismaPromiseTransaction | undefined, clientMethod: string, args: RawQueryArgs, middlewareArgsMapper?: MiddlewareArgsMapper<unknown, unknown>): Promise<number>;
         /**
          * Executes a raw query provided through a safe tag function
-         * @see https://github.com/prisma/prisma/issues/7142
-         *
-         * @param query
-         * @param values
-         * @returns
          */
         $executeRaw(query: TemplateStringsArray | Sql, ...values: any[]): PrismaPromise_2<unknown, any>;
-        /**
-         * Unsafe counterpart of `$executeRaw` that is susceptible to SQL injections
-         * @see https://github.com/prisma/prisma/issues/7142
-         *
-         * @param query
-         * @param values
-         * @returns
-         */
+    
         $executeRawUnsafe(query: string, ...values: RawValue[]): PrismaPromise_2<unknown, any>;
         /**
          * Executes a raw command only for MongoDB
@@ -1659,11 +1569,7 @@ export declare function getPrismaClient(config: GetPrismaClientConfig): {
     };
 };
 
-/**
- * Config that is stored into the generated client. When the generated client is
- * loaded, this same config is passed to {@link getPrismaClient} which creates a
- * closure with that config around a non-instantiated [[PrismaClient]].
- */
+
 export declare type GetPrismaClientConfig = {
     runtimeDataModel: RuntimeDataModel;
     generator?: GeneratorConfig;
@@ -1677,58 +1583,27 @@ export declare type GetPrismaClientConfig = {
     engineVersion: string;
     datasourceNames: string[];
     activeProvider: ActiveConnectorType;
-    /**
-     * The contents of the schema encoded into a string
-     * @remarks only used for the purpose of data proxy
-     */
+   
     inlineSchema: string;
-    /**
-     * A special env object just for the data proxy edge runtime.
-     * Allows bundlers to inject their own env variables (Vercel).
-     * Allows platforms to declare global variables as env (Workers).
-     * @remarks only used for the purpose of data proxy
-     */
+    
     injectableEdgeEnv?: () => LoadedEnv;
-    /**
-     * The contents of the datasource url saved in a string.
-     * This can either be an env var name or connection string.
-     * It is needed by the client to connect to the Data Proxy.
-     * @remarks only used for the purpose of data proxy
-     */
+    
     inlineDatasources: {
         [name in string]: {
             url: EnvValue;
         };
     };
-    /**
-     * The string hash that was produced for a given schema
-     * @remarks only used for the purpose of data proxy
-     */
+    
     inlineSchemaHash: string;
     /**
      * A marker to indicate that the client was not generated via `prisma
-     * generate` but was generated via `generate --postinstall` script instead.
-     * @remarks used to error for Vercel/Netlify for schema caching issues
      */
     postinstall?: boolean;
-    /**
-     * Information about the CI where the Prisma Client has been generated. The
-     * name of the CI environment is stored at generation time because CI
-     * information is not always available at runtime. Moreover, the edge client
-     * has no notion of environment variables, so this works around that.
-     * @remarks used to error for Vercel/Netlify for schema caching issues
-     */
+    
     ciName?: string;
-    /**
-     * Information about whether we have not found a schema.prisma file in the
-     * default location, and that we fell back to finding the schema.prisma file
-     * in the current working directory. This usually means it has been bundled.
-     */
+    
     isBundled?: boolean;
-    /**
-     * A boolean that is `false` when the client was generated with --no-engine. At
-     * runtime, this means the client will be bound to be using the Data Proxy.
-     */
+    
     copyEngine?: boolean;
     /**
      * Optional wasm loading configuration
@@ -1795,18 +1670,7 @@ declare type HandleErrorParams = {
 
 declare type HrTime = [number, number];
 
-/**
- * Defines High-Resolution Time.
- *
- * The first number, HrTime[0], is UNIX Epoch time in seconds since 00:00:00 UTC on 1 January 1970.
- * The second number, HrTime[1], represents the partial second elapsed since Unix Epoch time represented by first number in nanoseconds.
- * For example, 2021-01-01T12:30:10.150Z in UNIX Epoch time in milliseconds is represented as 1609504210150.
- * The first number is calculated by converting and truncating the Epoch time in milliseconds to seconds:
- * HrTime[0] = Math.trunc(1609504210150 / 1000) = 1609504210.
- * The second number is calculated by converting the digits after the decimal point of the subtraction, (1609504210150 / 1000) - HrTime[0], to nanoseconds:
- * HrTime[1] = Number((1609504210.150 - HrTime[0]).toFixed(9)) * 1e9 = 150000000.
- * This is represented in HrTime format as [1609504210, 150000000].
- */
+
 declare type HrTime_2 = [number, number];
 
 declare type Index = ReadonlyDeep_2<{
@@ -1852,19 +1716,7 @@ export declare type InputJsonObject = {
     readonly [Key in string]?: InputJsonValue | null;
 };
 
-/**
- * Matches any valid value that can be used as an input for operations like
- * create and update as the value of a JSON field. Unlike \`JsonValue\`, this
- * type allows read-only arrays and read-only object properties and disallows
- * \`null\` at the top level.
- *
- * \`null\` cannot be used as the value of a JSON field because its meaning
- * would be ambiguous. Use \`Prisma.JsonNull\` to store the JSON null value or
- * \`Prisma.DbNull\` to clear the JSON value and set the field to the database
- * NULL value instead.
- *
- * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-by-null-values
- */
+
 export declare type InputJsonValue = string | number | boolean | InputJsonObject | InputJsonArray | {
     toJSON(): unknown;
 };
@@ -1936,17 +1788,9 @@ export declare type InternalArgs<R = {
 };
 
 declare type InternalRequestParams = {
-    /**
-     * The original client method being called.
-     * Even though the rootField / operation can be changed,
-     * this method stays as it is, as it's what the user's
-     * code looks like
-     */
+    
     clientMethod: string;
-    /**
-     * Name of js model that triggered the request. Might be used
-     * for warnings or error messages
-     */
+    
     jsModelName?: string;
     callsite?: CallSite;
     transaction?: PrismaPromiseTransaction;
@@ -2005,10 +1849,7 @@ declare type JsonArgumentValue = number | string | boolean | null | RawTaggedVal
     [key: string]: JsonArgumentValue;
 };
 
-/**
- * From https://github.com/sindresorhus/type-fest/
- * Matches a JSON array.
- */
+
 export declare interface JsonArray extends Array<JsonValue> {
 }
 
@@ -2032,11 +1873,7 @@ declare class JsonNull extends NullTypesEnumValue {
     #private;
 }
 
-/**
- * From https://github.com/sindresorhus/type-fest/
- * Matches a JSON object.
- * This type can be useful to enforce some input to be JSON-compatible or as a super-type to be extended from.
- */
+
 export declare type JsonObject = {
     [Key in string]?: JsonValue;
 };
@@ -2056,10 +1893,7 @@ declare type JsonSelectionSet = {
     [fieldName: string]: boolean | JsonFieldSelection;
 };
 
-/**
- * From https://github.com/sindresorhus/type-fest/
- * Matches any valid JSON value.
- */
+
 export declare type JsonValue = string | number | boolean | JsonObject | JsonArray | null;
 
 export declare type JsOutputValue = null | string | number | boolean | bigint | Uint8Array | Date | Decimal | JsOutputValue[] | {
@@ -2075,21 +1909,7 @@ declare type KnownErrorParams = {
     batchRequestIdx?: number;
 };
 
-/**
- * A pointer from the current {@link Span} to another span in the same trace or
- * in a different trace.
- * Few examples of Link usage.
- * 1. Batch Processing: A batch of elements may contain elements associated
- *    with one or more traces/spans. Since there can only be one parent
- *    SpanContext, Link is used to keep reference to SpanContext of all
- *    elements in the batch.
- * 2. Public Endpoint: A SpanContext in incoming client request on a public
- *    endpoint is untrusted from service provider perspective. In such case it
- *    is advisable to start a new trace with appropriate sampling decision.
- *    However, it is desirable to associate incoming SpanContext to new trace
- *    initiated on service provider side so two traces (from Client and from
- *    Service Provider) can be correlated.
- */
+
 declare interface Link {
     /** The {@link SpanContext} of a linked span. */
     context: SpanContext;
