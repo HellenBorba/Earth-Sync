@@ -1,7 +1,7 @@
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
+import { Card } from '../atoms/card';
+import { Badge } from '../atoms/badge';
 import { MapPin, Calendar, Zap } from 'lucide-react';
-import { Event } from '../types/event';
+import { Event } from '../../types/event';
 
 interface EventCardProps {
   event: Event;

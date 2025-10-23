@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { EventCard } from './EventCard';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { EventCard } from '../molecules/EventCard';
+import { Input } from '../atoms/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../atoms/select';
+import { Button } from '../atoms/button';
+import { Badge } from '../atoms/badge';
 import { Search, Filter, Calendar, MapPin, Activity } from 'lucide-react';
-import { Event } from '../types/event';
+import { Event } from '../../types/event';
 
 interface EventListProps {
   events: Event[];

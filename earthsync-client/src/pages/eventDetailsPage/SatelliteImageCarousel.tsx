@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Card } from '../../components/atoms/card';
+import { Button } from '../../components/atoms/button';
+import { Badge } from '../../components/atoms/badge';
 import { ChevronLeft, ChevronRight, ZoomIn, ExternalLink, Download, Calendar, Camera } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { SatelliteImage } from '../types/event';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../components/atoms/dialog';
+import { SatelliteImage } from '../../types/event';
+import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
 
 interface SatelliteImageCarouselProps {
   images: SatelliteImage[];

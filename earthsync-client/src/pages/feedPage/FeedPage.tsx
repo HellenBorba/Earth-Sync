@@ -1,14 +1,14 @@
 import { useState, useMemo } from 'react';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Card } from '../../components/atoms/card';
+import { Button } from '../../components/atoms/button';
+import { Badge } from '../../components/atoms/badge';
+import { Input } from '../../components/atoms/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/atoms/select';
+import { Calendar } from '../../components/atoms/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../../components/atoms/popover';
 import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Event } from '../types/event';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Event } from '../../types/event';
+import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
 // import { format } from 'date-fns';
 // import { ptBR } from 'date-fns/locale';
 

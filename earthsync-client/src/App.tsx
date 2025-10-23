@@ -1,24 +1,24 @@
 //import HistoricoPesquisas from "./HistoricoPesquisas";
 
-import { getEvents } from "./api/events";
+import { getEvents } from "./services/api/events";
 import { useState, useEffect } from "react";
-import { EventList } from "./components/EventList";
-import { MapView } from "./components/MapView";
-import { EventDetails } from "./components/EventDetails";
-import { FeedPage } from "./components/FeedPage";
-import { AboutPage } from "./components/AboutPage";
-import { Navigation } from "./components/Navigation";
-import { GlobalMapOverview } from "./components/GlobalMapOverview";
-import { SpaceBackground } from "./components/SpaceBackground";
-import { ResponsiveDemo } from "./components/ResponsiveDemo";
-import { Button } from "./components/ui/button";
+import { EventList } from "./components/organisms/EventList";
+import { MapView } from "./pages/initialPage/MapView";
+import { EventDetails } from "./pages/eventDetailsPage/EventDetails";
+import { FeedPage } from "./pages/feedPage/FeedPage";
+import { AboutPage } from "./pages/aboutPage/AboutPage";
+import { Navigation } from "./components/molecules/Navigation";
+import { GlobalMapOverview } from "./pages/initialPage/GlobalMapOverview";
+import { SpaceBackground } from "./components/atoms/SpaceBackground";
+import { ResponsiveDemo } from "./components/atoms/ResponsiveDemo";
+import { Button } from "./components/atoms/button";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "./components/ui/tabs";
-import { Toaster } from "./components/ui/sonner";
+} from "./components/atoms/tabs";
+import { Toaster } from "./components/atoms/sonner";
 import {
   List,
   Map,

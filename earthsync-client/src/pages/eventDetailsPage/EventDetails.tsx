@@ -1,14 +1,14 @@
 import { ArrowLeft, MapPin, Calendar, Globe, Zap, ExternalLink, Share2, AlertTriangle, Activity, TrendingUp } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
+import { Button } from '../../components/atoms/button';
+import { Card } from '../../components/atoms/card';
+import { Badge } from '../../components/atoms/badge';
+import { Separator } from '../../components/atoms/separator';
 import { SatelliteImageCarousel } from './SatelliteImageCarousel';
 import { toast } from 'sonner';
-import { Event } from '../types/event';
+import { Event } from '../../types/event';
 import { useEffect, useState } from "react";
-import { getEventImages } from "../api/events";
-import { SatelliteImage } from "../types/event";
+import { getEventImages } from "../../services/api/events";
+import { SatelliteImage } from "../../types/event";
 
 interface EventDetailsProps {
   event: Event;

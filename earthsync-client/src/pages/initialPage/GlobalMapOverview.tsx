@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Event } from '../types/event';
+import { Event } from '../../types/event';
 import { MapPin, Eye } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { Button } from '../../components/atoms/button';
+import { Card } from '../../components/atoms/card';
 
 interface GlobalMapOverviewProps {
   events: Event[];
