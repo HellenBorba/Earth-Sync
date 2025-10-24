@@ -35,11 +35,11 @@ export interface Event {
   categories: EventCategory[];
   sources: EventSource[];
   geometry: EventGeometry[];
-  satelliteImages?: SatelliteImage[];
   status?: 'active' | 'closed' | 'monitoring';
   severity?: 'low' | 'medium' | 'high' | 'critical';
   affectedArea?: string;
   estimatedImpact?: string;
+  images?: SatelliteImage[];
 }
 
 export interface EONETResponse {

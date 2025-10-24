@@ -7,7 +7,7 @@ import { SatelliteImageCarousel } from './SatelliteImageCarousel';
 import { toast } from 'sonner';
 import { Event } from '../../types/event';
 import { useEffect, useState } from "react";
-import { getEventImages } from "../../services/api/events";
+// import { getEventImages } from "../../services/api/events";
 import { SatelliteImage } from "../../types/event";
 
 interface EventDetailsProps {
@@ -30,13 +30,30 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
   const [images, setImages] = useState<SatelliteImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  console.log(event);
+
+useEffect(() => {
+  const API = 'http://localhost:5000';
+
+  async function loadImages() {
+    if (!event?.id) return;
+    
     setLoading(true);
-    getEventImages(event.id)
-      .then(setImages)
-      .catch(() => setImages([]))
-      .finally(() => setLoading(false));
-  }, [event.id]);
+
+    try {
+      const res = await fetch(`${API}/api/events/${event.id}?includeImages=true`);
+      const data = await res.json(); // JSON vindo do backend
+      setImages(data.images || []);
+    } catch (error) {
+      console.error("Erro ao buscar imagens:", error);
+      setImages([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadImages();
+}, [event.id]);
 
   const getEventTypeColor = (category: string) => {
     const colors: Record<string, string> = {
