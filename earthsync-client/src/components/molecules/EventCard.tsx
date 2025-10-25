@@ -13,22 +13,6 @@ interface EventCardProps {
   showAffectedArea?: boolean;
 }
 
-const eventTypeIcons: Record<string, React.ReactNode> = {
-  'Wildfires': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Severe Storms': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Volcanoes': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Earthquakes': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Floods': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Droughts': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Dust and Haze': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Snow': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Water Color': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Landslides': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Manmade': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Sea and Lake Ice': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-  'Temperature Extremes': <Zap className="w-3 h-3 sm:w-4 sm:h-4" />,
-};
-
 const eventTypeColors: Record<string, string> = {
   'Wildfires': 'bg-red-500/20 text-red-300 border-red-500/30',
   'Severe Storms': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
@@ -45,38 +29,45 @@ const eventTypeColors: Record<string, string> = {
   'Temperature Extremes': 'bg-pink-500/20 text-pink-300 border-pink-500/30',
 };
 
-const eventTypeImages: Record<string, string> = {
-  'Wildfires': 'https://images.unsplash.com/photo-1648464680431-ac400e806714?...',
-  'Severe Storms': 'https://images.unsplash.com/photo-1608933520361-9f397ca051c5?...',
-  'Earthquakes': 'https://images.unsplash.com/photo-1707317683665-972a5561c74e?...',
-  'Floods': 'https://images.unsplash.com/photo-1706737373665-6ff5e08347e5?...',
-  'default': 'https://images.unsplash.com/photo-1636565214233-6d1019dfbc36?...',
-};
-
 export function EventCard({
   event,
   onClick,
   showImage = true,
-  showSeverityBadge = true,
-  showAffectedArea = false,
+  showSeverityBadge = false,
+  showAffectedArea = false
 }: EventCardProps) {
+  // Pega a primeira imagem do evento ou fallback
+  const imageUrl = event.images?.[0]?.url || '/images/placeholder-400x200.png';
+
+  console.log(event.images)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getLocation = () => {
+  const getRegion = () => {
     if (event.geometry && event.geometry.length > 0) {
-      const coords = event.geometry[0].coordinates;
-      return `${coords[1].toFixed(2)}°, ${coords[0].toFixed(2)}°`;
-    }
-    return 'Localização não disponível';
-  };
+      const coords = event.geometry[0].coordinates as [number, number];
+      const [lng, lat] = coords;
 
-  const getEventImage = () => {
-    const categoryTitle = event.categories[0]?.title;
-    return eventTypeImages[categoryTitle] || eventTypeImages.default;
+      if (lat >= 60) return 'Ártico';
+      if (lat <= -60) return 'Antártida';
+
+      // Hemisférios
+      const north = lat > 0;
+
+      // Aproximação por continente
+      if (lat > 0 && lng < -30) return 'América do Norte';
+      if (lat < 0 && lng < -30) return 'América do Sul';
+      if (lat > 0 && lng > -30 && lng < 60) return 'Europa';
+      if (lat < 0 && lng > -30 && lng < 60) return 'África';
+      if (lat > 0 && lng >= 60) return 'Ásia';
+      if (lat < 0 && lng >= 60) return 'Oceania';
+
+      return north ? 'Norte' : 'Sul';
+    }
+    return 'Desconhecida';
   };
 
   const getEventTypeColor = () => {
@@ -85,14 +76,14 @@ export function EventCard({
   };
 
   return (
-    <Card 
+    <Card
       className="group relative overflow-hidden bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 hover:border-slate-600/80 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10"
       onClick={onClick}
     >
       {showImage && (
         <div className="relative h-48 overflow-hidden">
           <ImageWithFallback
-            src={getEventImage()}
+            src={event.images?.[0]?.url || '/images/placeholder-400x200.png'}
             alt={event.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
@@ -131,7 +122,7 @@ export function EventCard({
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <MapPin className="w-3 h-3 text-slate-400" />
-            {getLocation()}
+            {getRegion()}
           </div>
           {showAffectedArea && event.affectedArea && (
             <div className="text-slate-400">Área afetada: {event.affectedArea}</div>
