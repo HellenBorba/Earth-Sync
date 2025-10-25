@@ -30,8 +30,6 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
   const [images, setImages] = useState<SatelliteImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(event);
-
 useEffect(() => {
   const API = 'http://localhost:5000';
 

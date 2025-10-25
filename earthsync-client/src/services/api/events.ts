@@ -8,9 +8,3 @@ export async function getEvents() {
   }
   return response.json();
 }
-
-/* export async function getEventImages(eventId: string): Promise<SatelliteImage[]> {
-  const res = await fetch(`${API_BASE_URL}/events/${eventId}/images`);
-  if (!res.ok) throw new Error("Erro ao buscar imagens do evento");
-  return res.json();
-} */

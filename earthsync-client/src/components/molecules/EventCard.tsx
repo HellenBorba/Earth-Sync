@@ -1,11 +1,16 @@
 import { Card } from '../atoms/card';
 import { Badge } from '../atoms/badge';
-import { MapPin, Calendar, Zap } from 'lucide-react';
+import { MapPin, Calendar, Zap, Clock, ExternalLink } from 'lucide-react';
+import { Button } from '../atoms/button';
 import { Event } from '../../types/event';
+import { ImageWithFallback } from '../atoms/ImageWithFallback';
 
 interface EventCardProps {
   event: Event;
-  onClick: () => void;
+  onClick?: () => void;
+  showImage?: boolean;
+  showSeverityBadge?: boolean;
+  showAffectedArea?: boolean;
 }
 
 const eventTypeIcons: Record<string, React.ReactNode> = {
@@ -40,15 +45,25 @@ const eventTypeColors: Record<string, string> = {
   'Temperature Extremes': 'bg-pink-500/20 text-pink-300 border-pink-500/30',
 };
 
-export function EventCard({ event, onClick }: EventCardProps) {
+const eventTypeImages: Record<string, string> = {
+  'Wildfires': 'https://images.unsplash.com/photo-1648464680431-ac400e806714?...',
+  'Severe Storms': 'https://images.unsplash.com/photo-1608933520361-9f397ca051c5?...',
+  'Earthquakes': 'https://images.unsplash.com/photo-1707317683665-972a5561c74e?...',
+  'Floods': 'https://images.unsplash.com/photo-1706737373665-6ff5e08347e5?...',
+  'default': 'https://images.unsplash.com/photo-1636565214233-6d1019dfbc36?...',
+};
+
+export function EventCard({
+  event,
+  onClick,
+  showImage = true,
+  showSeverityBadge = true,
+  showAffectedArea = false,
+}: EventCardProps) {
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
   const getLocation = () => {
@@ -59,49 +74,68 @@ export function EventCard({ event, onClick }: EventCardProps) {
     return 'Localização não disponível';
   };
 
+  const getEventImage = () => {
+    const categoryTitle = event.categories[0]?.title;
+    return eventTypeImages[categoryTitle] || eventTypeImages.default;
+  };
+
+  const getEventTypeColor = () => {
+    const type = event.categories[0]?.title || '';
+    return eventTypeColors[type] || 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+  };
+
   return (
     <Card 
       className="group relative overflow-hidden bg-gradient-to-br from-slate-900/50 to-slate-800/30 border-slate-700/50 hover:border-slate-600/80 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10"
       onClick={onClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
-      <div className="relative p-4 sm:p-6 space-y-3 sm:space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-slate-100 group-hover:text-white transition-colors duration-200 text-sm sm:text-base line-clamp-2">
-              {event.title}
-            </h3>
-          </div>
-          
-          <Badge 
-            variant="outline" 
-            className={`${eventTypeColors[event.categories[0]?.title] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} flex items-center gap-1.5 whitespace-nowrap self-start`}
-          >
-            {eventTypeIcons[event.categories[0]?.title] || <Zap className="w-3 h-3 sm:w-4 sm:h-4" />}
-            <span className="text-xs sm:text-sm">{event.categories[0]?.title || 'Desconhecido'}</span>
+      {showImage && (
+        <div className="relative h-48 overflow-hidden">
+          <ImageWithFallback
+            src={getEventImage()}
+            alt={event.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+          <Badge className={`absolute top-3 left-3 ${getEventTypeColor()}`}>
+            {event.categories[0]?.title}
           </Badge>
+          {showSeverityBadge && event.severity && (
+            <Badge className="absolute top-3 right-3 bg-slate-900/80 text-white border-slate-600">
+              {event.severity === 'low' ? 'Baixa' : event.severity === 'medium' ? 'Média' : event.severity === 'high' ? 'Alta' : 'Crítica'}
+            </Badge>
+          )}
+          <Button
+            size="sm"
+            className="absolute bottom-3 right-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
+            onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+          >
+            <ExternalLink className="w-3 h-3 mr-1" />
+            Ver Detalhes
+          </Button>
+        </div>
+      )}
+
+      <div className="p-4 space-y-3">
+        <div>
+          <h3 className="text-white font-medium mb-1 line-clamp-2 group-hover:text-blue-300 transition-colors">
+            {event.title}
+          </h3>
+          {event.description && <p className="text-slate-400 text-sm line-clamp-2">{event.description}</p>}
         </div>
 
-        <div className="space-y-2 sm:space-y-3">
-          <div className="flex items-center gap-2 text-slate-400 group-hover:text-slate-300 transition-colors duration-200">
-            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm">{formatDate(event.geometry[0]?.date || new Date().toISOString())}</span>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center gap-2 text-slate-300">
+            <Clock className="w-3 h-3 text-slate-400" />
+            {formatDate(event.geometry[0]?.date || new Date().toISOString())}
           </div>
-
-          <div className="flex items-center gap-2 text-slate-400 group-hover:text-slate-300 transition-colors duration-200">
-            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm truncate">{getLocation()}</span>
+          <div className="flex items-center gap-2 text-slate-300">
+            <MapPin className="w-3 h-3 text-slate-400" />
+            {getLocation()}
           </div>
-        </div>
-
-        <div className="pt-2 border-t border-slate-700/50">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">
-              ID: {event.id}
-            </span>
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400 animate-pulse" />
-          </div>
+          {showAffectedArea && event.affectedArea && (
+            <div className="text-slate-400">Área afetada: {event.affectedArea}</div>
+          )}
         </div>
       </div>
     </Card>

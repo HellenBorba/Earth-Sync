@@ -43,22 +43,35 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   }, [events]);
 
   const regions = useMemo(() => {
-    // Simplified region mapping based on coordinates
     const regionMapping = (coords: [number, number]): string => {
       const [lng, lat] = coords;
-      if (lat > 0) return 'Norte';
-      if (lat < -30) return 'Sul';
-      if (lng < -60) return 'Oeste';
-      if (lng > -40) return 'Leste';
-      return 'Centro';
+
+      if (lat >= 60) return 'Ártico';
+      if (lat <= -60) return 'Antártida';
+
+      // Hemisférios
+      const north = lat > 0;
+
+      // Leste/Oeste
+      const east = lng > 0;
+
+      // Aproximação por continente
+      if (lat > 0 && lng < -30) return 'América do Norte';
+      if (lat < 0 && lng < -30) return 'América do Sul';
+      if (lat > 0 && lng > -30 && lng < 60) return 'Europa';
+      if (lat < 0 && lng > -30 && lng < 60) return 'África';
+      if (lat > 0 && lng >= 60) return 'Ásia';
+      if (lat < 0 && lng >= 60) return 'Oceania';
+
+      return north ? 'Norte' : 'Sul';
     };
 
-    const regions = [...new Set(events.map(event => {
-      const coords = event.geometry[0]?.coordinates;
-      return coords ? regionMapping(coords) : 'Desconhecida';
-    }))];
-    
-    return regions;
+    return [...new Set(
+      events.map(e => {
+        const coords = e.geometry[0]?.coordinates;
+        return coords ? regionMapping(coords) : 'Desconhecida';
+      })
+    )];
   }, [events]);
 
   // Filter events
@@ -80,14 +93,26 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
       );
     }
 
-    // Region filter
+    // Region filter (global)
     if (selectedRegion !== 'all') {
       filtered = filtered.filter(event => {
         const coords = event.geometry[0]?.coordinates;
         if (!coords) return false;
-        
+
         const [lng, lat] = coords;
-        const region = lat > 0 ? 'Norte' : lat < -30 ? 'Sul' : lng < -60 ? 'Oeste' : lng > -40 ? 'Leste' : 'Centro';
+
+        const region = (() => {
+          if (lat >= 60) return 'Ártico';
+          if (lat <= -60) return 'Antártida';
+          if (lat > 0 && lng < -30) return 'América do Norte';
+          if (lat < 0 && lng < -30) return 'América do Sul';
+          if (lat > 0 && lng >= -30 && lng < 60) return 'Europa';
+          if (lat < 0 && lng >= -30 && lng < 60) return 'África';
+          if (lat > 0 && lng >= 60) return 'Ásia';
+          if (lat < 0 && lng >= 60) return 'Oceania';
+          return lat > 0 ? 'Norte' : 'Sul';
+        })();
+
         return region === selectedRegion;
       });
     }
@@ -107,7 +132,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
       });
     }
 
-    return filtered.sort((a, b) => 
+    return filtered.sort((a, b) =>
       new Date(b.geometry[0]?.date || '').getTime() - new Date(a.geometry[0]?.date || '').getTime()
     );
   }, [events, searchTerm, selectedType, selectedRegion, dateFrom, dateTo]);
@@ -138,25 +163,31 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     const date = new Date(dateString);
     const now = new Date();
     const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffHours < 1) return 'Agora mesmo';
     if (diffHours < 24) return `${diffHours}h atrás`;
-    
+
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays === 1) return 'Ontem';
     if (diffDays < 7) return `${diffDays} dias atrás`;
-    
+
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
   const getLocationName = (coordinates: [number, number]): string => {
     const [lng, lat] = coordinates;
-    // Simplified location mapping
-    if (lat > -10 && lng < -40) return 'Nordeste, Brasil';
-    if (lat < -20 && lng > -50) return 'Sudeste, Brasil';
-    if (lat < -25 && lng < -50) return 'Sul, Brasil';
-    if (lat > -10 && lng > -50) return 'Norte, Brasil';
-    if (lng < -60) return 'América do Sul';
+
+    if (lat >= 60) return 'Ártico';
+    if (lat <= -60) return 'Antártida';
+
+    if (lat > 0 && lng < -30) return 'América do Norte';
+    if (lat < 0 && lng < -30) return 'América do Sul';
+    if (lat > 0 && lng >= -30 && lng < 60) return 'Europa';
+    if (lat < 0 && lng >= -30 && lng < 60) return 'África';
+    if (lat > 0 && lng >= 60) return 'Ásia';
+    if (lat < 0 && lng >= 60) return 'Oceania';
+
+    // fallback caso não se encaixe em nenhuma região
     return `${lat.toFixed(1)}°, ${lng.toFixed(1)}°`;
   };
 
@@ -180,7 +211,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
             {filteredEvents.length !== events.length && ` de ${events.length} total`}
           </p>
         </div>
-        
+
         <Button
           variant="outline"
           onClick={clearFilters}
@@ -316,7 +347,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedEvents.map((event) => (
-            <Card 
+            <Card
               key={event.id}
               className="bg-slate-900/50 border-slate-700/50 overflow-hidden hover:border-slate-600/50 transition-all duration-300 cursor-pointer group"
               onClick={() => onEventClick(event)}
@@ -328,12 +359,12 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
                   alt={event.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                
+
                 {/* Event Type Badge */}
-                <Badge 
+                <Badge
                   className={`absolute top-3 left-3 ${getEventTypeColor(event.categories[0]?.title)}`}
                 >
                   {event.categories[0]?.title}
@@ -341,12 +372,12 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
 
                 {/* Severity Badge */}
                 {event.severity && (
-                  <Badge 
+                  <Badge
                     className="absolute top-3 right-3 bg-slate-900/80 text-white border-slate-600"
                   >
-                    {event.severity === 'low' ? 'Baixa' : 
-                     event.severity === 'medium' ? 'Média' : 
-                     event.severity === 'high' ? 'Alta' : 'Crítica'}
+                    {event.severity === 'low' ? 'Baixa' :
+                      event.severity === 'medium' ? 'Média' :
+                        event.severity === 'high' ? 'Alta' : 'Crítica'}
                   </Badge>
                 )}
 
@@ -416,10 +447,10 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
 
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const pageNum = currentPage <= 3 
-                ? i + 1 
-                : currentPage >= totalPages - 2 
-                  ? totalPages - 4 + i 
+              const pageNum = currentPage <= 3
+                ? i + 1
+                : currentPage >= totalPages - 2
+                  ? totalPages - 4 + i
                   : currentPage - 2 + i;
 
               if (pageNum < 1 || pageNum > totalPages) return null;

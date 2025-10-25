@@ -21,6 +21,7 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.19"
+    "@types/cors": "^2.8.19",
+    "prisma": "^6.18.0"
   }
 }
