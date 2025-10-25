@@ -1,0 +1,20 @@
+{
+  "name": "earth-sync",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "client": "cd earthsync-client && npm run dev",
+    "server": "cd earthsync-server && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd earthsync-client && npm install && cd ../earthsync-server && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
