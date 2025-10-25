@@ -25,26 +25,26 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
 
+  console.log('Primeiro evento, Images:', events[0]?.images);
+
   // Get unique event types and regions
   const eventTypes = useMemo(() => {
     const types = [...new Set(events.flatMap(event => event.categories.map(cat => cat.title)))];
     return types;
   }, [events]);
 
+  // components/pages/FeedPage.tsx
+
   const regions = useMemo(() => {
-    const regionMapping = (coords: [number, number]): string => {
+    const regionMapping = (event: Event): string => {
+      // A função interna JÁ espera o 'event' e lida com o acesso seguro:
+      const coords = event.geometry?.[0]?.coordinates as [number, number];
+      if (!coords) return 'Desconhecida';
       const [lng, lat] = coords;
 
       if (lat >= 60) return 'Ártico';
       if (lat <= -60) return 'Antártida';
-
-      // Hemisférios
-      const north = lat > 0;
-
-      // Leste/Oeste
-      const east = lng > 0;
-
-      // Aproximação por continente
+      // ... (Resto da lógica de continente)
       if (lat > 0 && lng < -30) return 'América do Norte';
       if (lat < 0 && lng < -30) return 'América do Sul';
       if (lat > 0 && lng > -30 && lng < 60) return 'Europa';
@@ -52,14 +52,11 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
       if (lat > 0 && lng >= 60) return 'Ásia';
       if (lat < 0 && lng >= 60) return 'Oceania';
 
-      return north ? 'Norte' : 'Sul';
+      return lat > 0 ? 'Norte' : 'Sul';
     };
 
     return [...new Set(
-      events.map(e => {
-        const coords = e.geometry[0]?.coordinates;
-        return coords ? regionMapping(coords) : 'Desconhecida';
-      })
+      events.map(e => regionMapping(e)) // CORREÇÃO: Passe o evento inteiro (e)
     )];
   }, [events]);
 
@@ -85,8 +82,9 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     // Region filter (global)
     if (selectedRegion !== 'all') {
       filtered = filtered.filter(event => {
-        const coords = event.geometry[0]?.coordinates;
-        if (!coords) return false;
+        const coords = event.geometry?.[0]?.coordinates; 
+
+        if (!coords) return selectedRegion === 'Desconhecida'; 
 
         const [lng, lat] = coords;
 

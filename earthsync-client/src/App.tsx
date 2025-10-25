@@ -27,47 +27,6 @@ import {
 } from "lucide-react";
 import { Event, SatelliteImage } from "./types/event";
 
-// Mock satellite images
-const mockSatelliteImages: Record<string, SatelliteImage[]> = {
-  EONET_6789: [
-    {
-      id: "sat_001",
-      title: "Imagem RGB - Incêndio Serra da Mantiqueira",
-      url: "https://images.unsplash.com/photo-1680896500454-d8773fe9cf24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMHNhdGVsbGl0ZSUyMGluZnJhcmVkfGVufDF8fHx8MTc1NzYwMjQ3OXww&ixlib=rb-4.1.0&q=80&w=1080",
-      thumbnail:
-        "https://images.unsplash.com/photo-1680896500454-d8773fe9cf24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMHNhdGVsbGl0ZSUyMGluZnJhcmVkfGVufDF8fHx8MTc1NzYwMjQ3OXww&ixlib=rb-4.1.0&q=80&w=400",
-      source: "MODIS/Aqua",
-      date: new Date(Date.now() - 2 * 3600000).toISOString(),
-      resolution: "250m",
-      type: "RGB",
-    },
-    {
-      id: "sat_002",
-      title: "Imagem Infravermelha - Análise Térmica",
-      url: "https://images.unsplash.com/photo-1635328608900-d9b440faa0e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0aGVybWFsJTIwaW1hZ2luZyUyMHNhdGVsbGl0ZXxlbnwxfHx8fDE3NTc2MDI0ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      thumbnail:
-        "https://images.unsplash.com/photo-1635328608900-d9b440faa0e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0aGVybWFsJTIwaW1hZ2luZyUyMHNhdGVsbGl0ZXxlbnwxfHx8fDE3NTc2MDI0ODZ8MA&ixlib=rb-4.1.0&q=80&w=400",
-      source: "VIIRS/NOAA-20",
-      date: new Date(Date.now() - 4 * 3600000).toISOString(),
-      resolution: "750m",
-      type: "THERMAL",
-    },
-  ],
-  EONET_6790: [
-    {
-      id: "sat_003",
-      title: "Tempestade - Imagem GOES-16",
-      url: "https://images.unsplash.com/photo-1722080767309-5c531b4f0aa1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdG9ybSUyMHNhdGVsbGl0ZSUyMHdlYXRoZXJ8ZW58MXx8fHwxNzU3NjAyNDgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      thumbnail:
-        "https://images.unsplash.com/photo-1722080767309-5c531b4f0aa1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdG9ybSUyMHNhdGVsbGl0ZSUyMHdlYXRoZXJ8ZW58MXx8fHwxNzU3NjAyNDgyfDA&ixlib=rb-4.1.0&q=80&w=400",
-      source: "GOES-16/NOAA",
-      date: new Date(Date.now() - 1 * 3600000).toISOString(),
-      resolution: "500m",
-      type: "RGB",
-    },
-  ],
-};
-
 export default function App() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] =
@@ -87,20 +46,20 @@ export default function App() {
     string | null
   >(null);
 
-// ...existing code...
-const fetchEvents = async () => {
-  setIsLoading(true);
-  try {
-    const data = await getEvents();
-    setEvents(data.events); // O backend retorna { events: [...] }
-  } catch (error) {
-    // Trate o erro conforme necessário, ex: mostrar toast
-    setEvents([]);
-  }
-  setLastUpdate(new Date());
-  setIsLoading(false);
-};
-// ...existing code...
+  const fetchEvents = async () => {
+    setIsLoading(true);
+    try {
+      // getEvents agora faz o trabalho pesado de buscar os detalhes
+      const data = await getEvents({ includeImages: true });
+      // Isso já está correto:
+      setEvents(data.events);
+      console.log("DADOS BRUTOS DO 1º EVENTO (APÓS DETALHE):", data.events[0]); // AGORA DEVE TER 'images'
+    } catch (error) {
+      setEvents([]);
+    }
+    setLastUpdate(new Date());
+    setIsLoading(false);
+  };
 
   // Handle URL routing
   useEffect(() => {

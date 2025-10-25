@@ -48,3 +48,7 @@ export interface EONETResponse {
   link: string;
   events: Event[];
 }
+
+export interface EventsResult {
+  events: Event[];
+}
