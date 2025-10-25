@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card } from '../../components/atoms/card';
 import { Button } from '../../components/atoms/button';
-import { Badge } from '../../components/atoms/badge';
 import { Input } from '../../components/atoms/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/atoms/select';
 import { Calendar } from '../../components/atoms/calendar';
@@ -10,22 +9,11 @@ import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft,
 import { Event } from '../../types/event';
 import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
 import { EventCard } from '../../components/molecules/EventCard';
-// import { format } from 'date-fns';
-// import { ptBR } from 'date-fns/locale';
 
 interface FeedPageProps {
   events: Event[];
   onEventClick: (event: Event) => void;
 }
-
-// Mapeamento de tipos de evento para imagens
-const eventTypeImages: Record<string, string> = {
-  'Wildfires': 'https://images.unsplash.com/photo-1648464680431-ac400e806714?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwZGlzYXN0ZXIlMjB3aWxkZmlyZSUyMGFlcmlhbHxlbnwxfHx8fDE3NTc2MDI3MjF8MA&ixlib=rb-4.1.0&q=80&w=1080',
-  'Severe Storms': 'https://images.unsplash.com/photo-1608933520361-9f397ca051c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxodXJyaWNhbmUlMjBzdG9ybSUyMGFlcmlhbCUyMHZpZXd8ZW58MXx8fHwxNzU3NjAyNzI0fDA&ixlib=rb-4.1.0&q=80&w=1080',
-  'Earthquakes': 'https://images.unsplash.com/photo-1707317683665-972a5561c74e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlYXJ0aHF1YWtlJTIwZGFtYWdlJTIwYWVyaWFsfGVufDF8fHx8MTc1NzYwMjcyOHww&ixlib=rb-4.1.0&q=80&w=1080',
-  'Floods': 'https://images.unsplash.com/photo-1706737373665-6ff5e08347e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmbG9vZCUyMGRpc2FzdGVyJTIwYWVyaWFsJTIwdmlld3xlbnwxfHx8fDE3NTc2MDI3MzF8MA&ixlib=rb-4.1.0&q=80&w=1080',
-  'default': 'https://images.unsplash.com/photo-1636565214233-6d1019dfbc36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXNhJTIwZWFydGglMjBvYnNlcnZhdGlvbnxlbnwxfHx8fDE3NTc2MDI3MzV8MA&ixlib=rb-4.1.0&q=80&w=1080'
-};
 
 const ITEMS_PER_PAGE = 9;
 
