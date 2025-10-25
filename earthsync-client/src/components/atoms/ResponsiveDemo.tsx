@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { Button } from "./button";
+import { Card } from './card';
 import { Smartphone, Tablet, Monitor, Eye, EyeOff } from 'lucide-react';
 
 interface ResponsiveDemoProps {

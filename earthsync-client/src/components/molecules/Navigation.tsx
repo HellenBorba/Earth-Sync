@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
+import { Button } from '../atoms/button';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '../atoms/sheet';
 import { Home, Rss, Info, Satellite, Menu, X } from 'lucide-react';
 
 interface NavigationProps {

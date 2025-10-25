@@ -1,14 +1,14 @@
 import { ArrowLeft, MapPin, Calendar, Globe, Zap, ExternalLink, Share2, AlertTriangle, Activity, TrendingUp } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
+import { Button } from '../../components/atoms/button';
+import { Card } from '../../components/atoms/card';
+import { Badge } from '../../components/atoms/badge';
+import { Separator } from '../../components/atoms/separator';
 import { SatelliteImageCarousel } from './SatelliteImageCarousel';
 import { toast } from 'sonner';
-import { Event } from '../types/event';
+import { Event } from '../../types/event';
 import { useEffect, useState } from "react";
-import { getEventImages } from "../api/events";
-import { SatelliteImage } from "../types/event";
+// import { getEventImages } from "../../services/api/events";
+import { SatelliteImage } from "../../types/event";
 
 interface EventDetailsProps {
   event: Event;
@@ -30,13 +30,28 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
   const [images, setImages] = useState<SatelliteImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
+  const API = 'http://localhost:5000';
+
+  async function loadImages() {
+    if (!event?.id) return;
+    
     setLoading(true);
-    getEventImages(event.id)
-      .then(setImages)
-      .catch(() => setImages([]))
-      .finally(() => setLoading(false));
-  }, [event.id]);
+
+    try {
+      const res = await fetch(`${API}/api/events/${event.id}?includeImages=true`);
+      const data = await res.json(); // JSON vindo do backend
+      setImages(data.images || []);
+    } catch (error) {
+      console.error("Erro ao buscar imagens:", error);
+      setImages([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadImages();
+}, [event.id]);
 
   const getEventTypeColor = (category: string) => {
     const colors: Record<string, string> = {

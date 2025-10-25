@@ -1,7 +1,7 @@
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
+import { Card } from '../../components/atoms/card';
+import { Button } from '../../components/atoms/button';
+import { Badge } from '../../components/atoms/badge';
+import { Separator } from '../../components/atoms/separator';
 import { 
   Satellite, 
   Globe, 
@@ -16,7 +16,7 @@ import {
   Smartphone,
   Monitor
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
 
 export function AboutPage() {
   const technologies = [
