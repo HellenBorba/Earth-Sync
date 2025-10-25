@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate",
     "studio": "npx prisma studio",
@@ -15,13 +17,13 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.18.0",
+    "@types/express": "^5.0.4",
     "axios": "^1.11.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "prisma": "^6.18.0"
+    "@types/cors": "^2.8.19"
   }
 }
