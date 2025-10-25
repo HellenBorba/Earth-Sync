@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../components/atoms/
 import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event } from '../../types/event';
 import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
+import { EventCard } from '../../components/molecules/EventCard';
 // import { format } from 'date-fns';
 // import { ptBR } from 'date-fns/locale';
 
@@ -141,55 +142,6 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedEvents = filteredEvents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  const getEventImage = (event: Event): string => {
-    const categoryTitle = event.categories[0]?.title;
-    return eventTypeImages[categoryTitle] || eventTypeImages.default;
-  };
-
-  const getEventTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      'Wildfires': 'bg-red-500/20 text-red-300 border-red-500/30',
-      'Severe Storms': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      'Earthquakes': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-      'Floods': 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      'Volcanoes': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-      'Dust and Haze': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    };
-    return colors[type] || 'bg-slate-500/20 text-slate-300 border-slate-500/30';
-  };
-
-  const formatEventDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
-    if (diffHours < 1) return 'Agora mesmo';
-    if (diffHours < 24) return `${diffHours}h atrás`;
-
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays === 1) return 'Ontem';
-    if (diffDays < 7) return `${diffDays} dias atrás`;
-
-    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const getLocationName = (coordinates: [number, number]): string => {
-    const [lng, lat] = coordinates;
-
-    if (lat >= 60) return 'Ártico';
-    if (lat <= -60) return 'Antártida';
-
-    if (lat > 0 && lng < -30) return 'América do Norte';
-    if (lat < 0 && lng < -30) return 'América do Sul';
-    if (lat > 0 && lng >= -30 && lng < 60) return 'Europa';
-    if (lat < 0 && lng >= -30 && lng < 60) return 'África';
-    if (lat > 0 && lng >= 60) return 'Ásia';
-    if (lat < 0 && lng >= 60) return 'Oceania';
-
-    // fallback caso não se encaixe em nenhuma região
-    return `${lat.toFixed(1)}°, ${lng.toFixed(1)}°`;
-  };
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -345,91 +297,20 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedEvents.map((event) => (
-            <Card
+            <EventCard
               key={event.id}
-              className="bg-slate-900/50 border-slate-700/50 overflow-hidden hover:border-slate-600/50 transition-all duration-300 cursor-pointer group"
+              event={event}
               onClick={() => onEventClick(event)}
-            >
-              {/* Event Image */}
-              <div className="relative h-48 overflow-hidden">
-                <ImageWithFallback
-                  src={getEventImage(event)}
-                  alt={event.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-
-                {/* Event Type Badge */}
-                <Badge
-                  className={`absolute top-3 left-3 ${getEventTypeColor(event.categories[0]?.title)}`}
-                >
-                  {event.categories[0]?.title}
-                </Badge>
-
-                {/* Severity Badge */}
-                {event.severity && (
-                  <Badge
-                    className="absolute top-3 right-3 bg-slate-900/80 text-white border-slate-600"
-                  >
-                    {event.severity === 'low' ? 'Baixa' :
-                      event.severity === 'medium' ? 'Média' :
-                        event.severity === 'high' ? 'Alta' : 'Crítica'}
-                  </Badge>
-                )}
-
-                {/* View Details Button */}
-                <Button
-                  size="sm"
-                  className="absolute bottom-3 right-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEventClick(event);
-                  }}
-                >
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  Ver Detalhes
-                </Button>
-              </div>
-
-              {/* Event Info */}
-              <div className="p-4 space-y-3">
-                <div>
-                  <h3 className="text-white font-medium mb-1 line-clamp-2 group-hover:text-blue-300 transition-colors">
-                    {event.title}
-                  </h3>
-                  {event.description && (
-                    <p className="text-slate-400 text-sm line-clamp-2">
-                      {event.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <Clock className="w-3 h-3 text-slate-400" />
-                    {formatEventDate(event.geometry[0]?.date || '')}
-                  </div>
-
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <MapPin className="w-3 h-3 text-slate-400" />
-                    {getLocationName(event.geometry[0]?.coordinates || [0, 0])}
-                  </div>
-
-                  {event.affectedArea && (
-                    <div className="text-slate-400">
-                      Área afetada: {event.affectedArea}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
+              showImage={true}
+              showSeverityBadge={true}
+              showAffectedArea={true}
+            />
           ))}
         </div>
       )}
+
 
       {/* Pagination */}
       {totalPages > 1 && (
