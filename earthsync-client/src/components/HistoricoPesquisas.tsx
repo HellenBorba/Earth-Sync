@@ -1,22 +1,23 @@
 // HistoricoPesquisas.tsx
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../api/config";
 
 export default function HistoricoPesquisas() {
   const [historico, setHistorico] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/historico")
-      .then(res => res.json())
-      .then(data => setHistorico(data));
+    fetch(`${API_BASE_URL}/history`)
+      .then((res) => res.json())
+      .then((data) => setHistorico(data));
   }, []);
 
   const salvar = async (termo: string) => {
-    await fetch("http://localhost:5000/api/historico", {
+    await fetch(`${API_BASE_URL}/history`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ termo }),
+      body: JSON.stringify({ query: termo }),
     });
-    const atualizado = await fetch("http://localhost:5000/api/historico").then(res => res.json());
+    const atualizado = await fetch(`${API_BASE_URL}/history`).then((res) => res.json());
     setHistorico(atualizado);
   };
 
@@ -27,7 +28,7 @@ export default function HistoricoPesquisas() {
       <ul>
         {historico.map((item: any) => (
           <li key={item.id}>
-            {item.termo} - {new Date(item.createdAt).toLocaleString()}
+            {item.query} - {new Date(item.createdAt).toLocaleString()}
           </li>
         ))}
       </ul>
