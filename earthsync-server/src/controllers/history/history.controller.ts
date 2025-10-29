@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import { historyService } from "../services/history.service";
+import { historyService } from "../../services/history.service";
+
+
 
 export const historyController = {
   getAll: async (req: Request, res: Response) => {
