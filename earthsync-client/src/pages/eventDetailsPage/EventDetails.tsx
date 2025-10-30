@@ -1,4 +1,7 @@
-import { ArrowLeft, MapPin, Calendar, Globe, Zap, ExternalLink, Share2, AlertTriangle, Activity, TrendingUp } from 'lucide-react';
+import {
+  ArrowLeft, MapPin, Calendar, Globe, Zap,
+  ExternalLink, Share2, AlertTriangle, Activity, TrendingUp
+} from 'lucide-react';
 import { Button } from '../../components/atoms/button';
 import { Card } from '../../components/atoms/card';
 import { Badge } from '../../components/atoms/badge';
@@ -7,7 +10,6 @@ import { SatelliteImageCarousel } from './SatelliteImageCarousel';
 import { toast } from 'sonner';
 import { Event } from '../../types/event';
 import { useEffect, useState } from "react";
-// import { getEventImages } from "../../services/api/events";
 import { SatelliteImage } from "../../types/event";
 
 interface EventDetailsProps {
@@ -26,32 +28,62 @@ function formatDate(dateStr: string) {
   });
 }
 
+/** Basic translation for event titles/categories */
+function translateEventTitle(title: string): string {
+  let t = title;
+
+  t = t
+    .replace(/\bTropical Storm(s)?\b/gi, 'Tempestade Tropical')
+    .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
+    .replace(/\bSevere Storm(s)?\b/gi, 'Tempestade Severa')
+    .replace(/\bWildfire(s)?\b/gi, 'Incêndio Florestal')
+    .replace(/\bPrescribed Fire(s)?\b/gi, 'Queima Controlada')
+    .replace(/\bFire(s)?\b/gi, 'Incêndio')
+    .replace(/\bFlood(s)?\b/gi, 'Inundação')
+    .replace(/\bEarthquake(s)?\b/gi, 'Terremoto')
+    .replace(/\bVolcano(es)?\b/gi, 'Vulcão')
+    .replace(/\bDrought(s)?\b/gi, 'Seca')
+    .replace(/\bSnow(s)?\b/gi, 'Nevasca')
+    .replace(/\bLandslide(s)?\b/gi, 'Deslizamento de Terra')
+    .replace(/\bDust and Haze\b/gi, 'Névoa e Poeira')
+    .replace(/\bSea and Lake Ice\b/gi, 'Gelo Marinho e Lacustre')
+    .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
+    .replace(/\bManmade\b/gi, 'Causado por Humanos');
+
+  // Rearranges “Fire in X…”
+  const match = t.match(/^(.*?)(Incêndio|Queima Controlada|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento)(.*)$/i);
+  if (match) {
+    const before = match[1].trim().replace(/^[,.\s]+/, '').replace(/[,.\s]+$/, '');
+    const disaster = match[2].trim();
+    const after = match[3].trim().replace(/^[,.\s]+/, '');
+    if (before) t = `${disaster} em ${before}${after ? ', ' + after : ''}`;
+  }
+
+  return t;
+}
+
 export function EventDetails({ event, onBack }: EventDetailsProps) {
   const [images, setImages] = useState<SatelliteImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const API = 'http://localhost:5000';
-
-  async function loadImages() {
-    if (!event?.id) return;
-    
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API}/api/events/${event.id}?includeImages=true`);
-      const data = await res.json(); // JSON vindo do backend
-      setImages(data.images || []);
-    } catch (error) {
-      console.error("Erro ao buscar imagens:", error);
-      setImages([]);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const API = 'http://localhost:5000';
+    async function loadImages() {
+      if (!event?.id) return;
+      setLoading(true);
+      try {
+        const res = await fetch(`${API}/api/events/${event.id}?includeImages=true`);
+        const data = await res.json();
+        setImages(data.images || []);
+      } catch (error) {
+        console.error("Erro ao buscar imagens:", error);
+        setImages([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-
-  loadImages();
-}, [event.id]);
+    loadImages();
+  }, [event.id]);
 
   const getEventTypeColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -83,17 +115,17 @@ useEffect(() => {
 
   const coordinates = getAllCoordinates();
   const category = event.categories[0]?.title || 'Desconhecido';
+  const translatedCategory = translateEventTitle(category);
+  const translatedTitle = translateEventTitle(event.title);
 
   const handleShare = () => {
     const eventUrl = `${window.location.origin}${window.location.pathname}#/evento/${encodeURIComponent(event.id)}`;
     if (navigator.share) {
       navigator.share({
-        title: `EONET Monitor - ${event.title}`,
-        text: `Confira este evento de ${category} detectado pelo sistema de monitoramento da NASA`,
+        title: `EONET Monitor - ${translatedTitle}`,
+        text: `Confira este evento de ${translatedCategory} detectado pelo sistema de monitoramento da NASA`,
         url: eventUrl,
-      }).catch(() => {
-        copyToClipboard(eventUrl);
-      });
+      }).catch(() => copyToClipboard(eventUrl));
     } else {
       copyToClipboard(eventUrl);
     }
@@ -134,30 +166,32 @@ useEffect(() => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onBack}
             className="text-slate-400 hover:text-white hover:bg-slate-800/50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
-          
+
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2 flex-wrap">
-              <Badge 
-                variant="outline" 
-                className={`${getSeverityColor(event.severity)}`}
-              >
+              <Badge variant="outline" className={`${getSeverityColor(event.severity)}`}>
                 {getSeverityIcon(event.severity)}
-                {event.severity ? 
-                  `Severidade ${event.severity === 'low' ? 'Baixa' : event.severity === 'medium' ? 'Média' : event.severity === 'high' ? 'Alta' : 'Crítica'}` : 
-                  'Evento Ativo'
-                }
+                {event.severity
+                  ? `Severidade ${event.severity === 'low'
+                    ? 'Baixa'
+                    : event.severity === 'medium'
+                      ? 'Média'
+                      : event.severity === 'high'
+                        ? 'Alta'
+                        : 'Crítica'}`
+                  : 'Evento Ativo'}
               </Badge>
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="bg-slate-800/50 text-slate-300 border-slate-600/50"
               >
                 ID: {event.id}
@@ -172,7 +206,7 @@ useEffect(() => {
                 Compartilhar
               </Button>
             </div>
-            <h1 className="text-3xl font-medium text-white">{event.title}</h1>
+            <h1 className="text-3xl font-medium text-white">{translatedTitle}</h1>
           </div>
         </div>
 
@@ -186,15 +220,15 @@ useEffect(() => {
                   <div>
                     <h2 className="text-xl text-white mb-2">Visão Geral do Evento</h2>
                     <p className="text-slate-300 leading-relaxed">
-                      Evento de tipo <strong>{category}</strong> detectado pelo sistema de monitoramento EONET da NASA. 
-                      Este evento está sendo monitorado em tempo real através de dados satelitais e outras fontes confiáveis.
+                      Evento de tipo <strong>{translatedCategory}</strong> detectado pelo sistema de monitoramento EONET da NASA.
+                      Este evento está sendo monitorado em tempo real através de dados de satélite e outras fontes confiáveis.
                     </p>
                   </div>
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className="text-slate-300 border-slate-600/50 bg-slate-800/30"
                   >
-                    {category}
+                    {translatedCategory}
                   </Badge>
                 </div>
 
@@ -212,7 +246,7 @@ useEffect(() => {
                 <Calendar className="w-5 h-5" />
                 Linha do Tempo
               </h3>
-              
+
               <div className="space-y-4">
                 {coordinates.map((coord, index) => (
                   <div key={index} className="flex items-start gap-4">
@@ -222,7 +256,7 @@ useEffect(() => {
                         <div className="w-px h-8 bg-slate-700 mt-2" />
                       )}
                     </div>
-                    
+
                     <div className="flex-1 pb-4">
                       <div className="text-white font-medium">
                         {formatDate(coord.date)}
@@ -260,7 +294,7 @@ useEffect(() => {
                   <Globe className="w-5 h-5" />
                   Fontes de Dados
                 </h3>
-                
+
                 <div className="grid gap-3">
                   {event.sources.map((source, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/30">
@@ -268,8 +302,8 @@ useEffect(() => {
                         <div className="text-white font-medium">{source.id}</div>
                         <div className="text-slate-400 text-sm">{source.url}</div>
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="ghost"
                         className="text-blue-400 hover:text-blue-300"
                         onClick={() => window.open(source.url, '_blank')}
@@ -291,7 +325,7 @@ useEffect(() => {
                 <MapPin className="w-5 h-5" />
                 Localização
               </h3>
-              
+
               <div className="space-y-3">
                 {coordinates.slice(0, 3).map((coord, index) => (
                   <div key={index} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/30">
@@ -303,7 +337,7 @@ useEffect(() => {
                     </div>
                   </div>
                 ))}
-                
+
                 {coordinates.length > 3 && (
                   <div className="text-center text-slate-400 text-sm">
                     +{coordinates.length - 3} outras localizações
@@ -315,15 +349,15 @@ useEffect(() => {
             {/* Categories */}
             <Card className="bg-slate-900/50 border-slate-700/50 p-6">
               <h3 className="text-lg text-white mb-4">Categorias</h3>
-              
+
               <div className="space-y-2">
                 {event.categories.map((cat, index) => (
-                  <Badge 
+                  <Badge
                     key={index}
-                    variant="outline" 
+                    variant="outline"
                     className="w-full justify-start bg-slate-800/30 text-slate-300 border-slate-600/50"
                   >
-                    {cat.title}
+                    {translateEventTitle(cat.title)}
                   </Badge>
                 ))}
               </div>
@@ -336,7 +370,7 @@ useEffect(() => {
                   <AlertTriangle className="w-5 h-5" />
                   Avaliação de Impacto
                 </h3>
-                
+
                 <div className="space-y-4">
                   {event.affectedArea && (
                     <div>
@@ -344,7 +378,7 @@ useEffect(() => {
                       <div className="text-white font-medium">{event.affectedArea}</div>
                     </div>
                   )}
-                  
+
                   {event.estimatedImpact && (
                     <div>
                       <span className="text-slate-400 text-sm">Impacto Estimado:</span>
@@ -356,31 +390,36 @@ useEffect(() => {
             )}
 
             {/* Status */}
-            <Card className={`${event.status === 'active' ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30' : 'bg-slate-900/50 border-slate-700/50'} p-6`}>
+            <Card
+              className={`${event.status === 'active'
+                ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30'
+                : 'bg-slate-900/50 border-slate-700/50'} p-6`}
+            >
               <h3 className="text-lg text-white mb-4">Status do Evento</h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${event.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-slate-400'}`} />
                   <span className={event.status === 'active' ? 'text-green-300' : 'text-slate-300'}>
-                    {event.status === 'active' ? 'Monitoramento Ativo' : 
-                     event.status === 'closed' ? 'Evento Encerrado' : 'Em Observação'}
+                    {event.status === 'active' ? 'Monitoramento Ativo'
+                      : event.status === 'closed' ? 'Evento Encerrado'
+                      : 'Em Observação'}
                   </span>
                 </div>
-                
+
                 <Separator className="bg-slate-700/50" />
-                
+
                 <div className="grid grid-cols-1 gap-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Última atualização:</span>
                     <span className="text-white">{formatDate(coordinates[0]?.date || new Date().toISOString())}</span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span className="text-slate-400">Próxima verificação:</span>
                     <span className="text-white">Em tempo real</span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span className="text-slate-400">Localizações registradas:</span>
                     <span className="text-white">{coordinates.length}</span>

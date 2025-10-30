@@ -1,4 +1,4 @@
-// HistoricoPesquisas.tsx
+// HistoryResearch.tsx
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../services/api/config";
 
