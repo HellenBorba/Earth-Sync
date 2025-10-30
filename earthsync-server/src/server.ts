@@ -1,4 +1,5 @@
-import express from "express";
+import express from 'express';
+import { setupSwagger } from './config/swagger';
 import cors from "cors";
 import eventsRouter from "./routes/events";  // apontando para events.ts
 import historyRouter from "./routes/history"; // apontando para history.ts
@@ -29,6 +30,9 @@ app.use((req, _res, next) => {
 app.use("/api/events", eventsRouter);
 app.use("/api/history", historyRouter);
 
+setupSwagger(app);
+
 app.listen(PORT, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Swagger disponível em http://localhost:${PORT}/api-docs`);
 });
