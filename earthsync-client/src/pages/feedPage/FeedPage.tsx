@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react'; 
 import { Card } from '../../components/atoms/card';
 import { Button } from '../../components/atoms/button';
 import { Input } from '../../components/atoms/input';
@@ -7,8 +7,8 @@ import { Calendar } from '../../components/atoms/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/atoms/popover';
 import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event } from '../../types/event';
-import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
 import { EventCard } from '../../components/molecules/EventCard';
+import { tCategory } from '../../utils/i18n'; // Adicionado tCategory
 
 interface FeedPageProps {
   events: Event[];
@@ -18,6 +18,8 @@ interface FeedPageProps {
 const ITEMS_PER_PAGE = 9;
 
 export function FeedPage({ events, onEventClick }: FeedPageProps) {
+  
+  const [processedEvents, setProcessedEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
@@ -25,30 +27,117 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
 
-  console.log('Primeiro evento, Images:', events[0]?.images);
+  // Mapping from English to Portuguese
+  const categoryMapPtToEn: Record<string, string> = useMemo(() => {
+    return {
+      'Incêndios': 'Wildfires',
+      'Tempestades Severas': 'Severe Storms',
+      'Ciclone Tropical': 'Tropical Cyclone',
+      'Ciclones Tropicais': 'Tropical Cyclones',
+      'Terremotos': 'Earthquakes',
+      'Inundações': 'Floods',
+      'Vulcões': 'Volcanoes',
+      'Névoa e Poeira': 'Dust and Haze',
+      'Secas': 'Drought',
+      'Deslizamentos': 'Landslides',
+      'Nevascas': 'Snow',
+      'Ações Humanas': 'Manmade',
+      'Gelo Marinho e Lacustre': 'Sea and Lake Ice',
+      'Temperatura Extrema': 'Extreme Temperature',
+    };
+  }, []);
 
-  // Get unique event types and regions
-  const eventTypes = useMemo(() => {
-    const types = [...new Set(events.flatMap(event => event.categories.map(cat => cat.title)))];
-    return types;
+  useEffect(() => {
+    if (events && events.length > 0) {
+      const processed = events.map(event => {
+        const mainCategoryTitleEn = event.categories[0]?.title || '';
+        const mainCategoryTitlePt = tCategory(mainCategoryTitleEn);
+
+        let translatedTitle = event.title;
+
+        // Treats plurals and compound nouns first
+        translatedTitle = translatedTitle
+          .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
+          .replace(/\bSevere Storm(s)?\b/gi, 'Tempestade Severa')
+          .replace(/\bSea and Lake Ice\b/gi, 'Gelo Marinho e Lacustre')
+          .replace(/\bDust and Haze\b/gi, 'Névoa e Poeira')
+          .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
+          .replace(/\bWater Color\b/gi, 'Cor da Água');
+
+        // Treats simple words (singular/plural) first
+        translatedTitle = translatedTitle
+          .replace(/\bWildfire(s)?\b/gi, 'Incêndio')
+          .replace(/\bFire(s)?\b/gi, 'Incêndio')
+          .replace(/\bFlood(s)?\b/gi, 'Inundação')
+          .replace(/\bEarthquake(s)?\b/gi, 'Terremoto')
+          .replace(/\bVolcano(es)?\b/gi, 'Vulcão')
+          .replace(/\bStorm(s)?\b/gi, 'Tempestade')
+          .replace(/\bCyclone(s)?\b/gi, 'Ciclone')
+          .replace(/\bDrought(s)?\b/gi, 'Seca')
+          .replace(/\bSnow(s)?\b/gi, 'Nevasca')
+          .replace(/\bLandslide(s)?\b/gi, 'Deslizamento')
+          .replace(/\bDust\b/gi, 'Poeira')
+          .replace(/\bHaze\b/gi, 'Névoa')
+          .replace(/\bIce\b/gi, 'Gelo')
+          .replace(/\bManmade\b/gi, 'Ação Humana');
+
+        // Reorder logic
+        const hasLocation = /,|\bfrom\b|\bin\b/i.test(translatedTitle);
+        if (hasLocation) {
+          const regexEvent = /^(.*?)(Incêndio|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento|Névoa|Gelo|Ação Humana)(.*)$/i;
+          const match = translatedTitle.match(regexEvent);
+          if (match) {
+            const before = match[1].trim();
+            const disaster = match[2].trim();
+            const after = match[3].trim();
+            
+            // Simplified reordering logic
+            if (before && after) {
+              translatedTitle = `${disaster} em ${before.replace(/[-,]+$/, '')}${after ? ', ' + after : ''}`;
+            } else if (before) {
+              translatedTitle = `${disaster} em ${before}`;
+            } else {
+              translatedTitle = disaster;
+            }
+          }
+        }
+
+        // Translate category within title if necessary (fallback)
+        if (mainCategoryTitleEn && mainCategoryTitlePt && mainCategoryTitleEn !== mainCategoryTitlePt) {
+          const regex = new RegExp(mainCategoryTitleEn, 'gi');
+          translatedTitle = translatedTitle.replace(regex, mainCategoryTitlePt);
+        }
+
+        return { ...event, title: translatedTitle };
+      });
+
+      setProcessedEvents(processed);
+    } else {
+      setProcessedEvents([]);
+    }
   }, [events]);
 
-  // components/pages/FeedPage.tsx
+  // Extracts unique event types, TRANSLATED to SELECT
+  const eventTypes = useMemo(() => {
+    // Get the unique categories in ENGLISH from processedEvents
+    const typesEn = [...new Set(processedEvents.flatMap(event => event.categories.map(cat => cat.title)))];
+    // Translates for display in the processedEvents filterS
+    return typesEn.map(tCategory);
+  }, [processedEvents]);
 
+  // Region mapping functions (USING processedEvents)
   const regions = useMemo(() => {
     const regionMapping = (event: Event): string => {
-      // A função interna JÁ espera o 'event' e lida com o acesso seguro:
       const coords = event.geometry?.[0]?.coordinates as [number, number];
       if (!coords) return 'Desconhecida';
       const [lng, lat] = coords;
 
       if (lat >= 60) return 'Ártico';
       if (lat <= -60) return 'Antártida';
-      // ... (Resto da lógica de continente)
       if (lat > 0 && lng < -30) return 'América do Norte';
       if (lat < 0 && lng < -30) return 'América do Sul';
-      if (lat > 0 && lng > -30 && lng < 60) return 'Europa';
-      if (lat < 0 && lng > -30 && lng < 60) return 'África';
+      if (lat > 0 && lng >= -30 && lng < 60) return 'Europa';
+      if (lat < 0 && lng >= -30 && lng < 60) return 'África';
       if (lat > 0 && lng >= 60) return 'Ásia';
       if (lat < 0 && lng >= 60) return 'Oceania';
 
@@ -56,13 +145,14 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     };
 
     return [...new Set(
-      events.map(e => regionMapping(e)) // CORREÇÃO: Passe o evento inteiro (e)
+      processedEvents.map(e => regionMapping(e)) 
     )];
-  }, [events]);
+  }, [processedEvents]);
 
-  // Filter events
+
+  // Filtering using processedEvents and PT -> EN conversion
   const filteredEvents = useMemo(() => {
-    let filtered = events;
+    let filtered = processedEvents;
 
     // Search filter
     if (searchTerm) {
@@ -74,12 +164,13 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
 
     // Type filter
     if (selectedType !== 'all') {
+      const selectedTypeEn = categoryMapPtToEn[selectedType] || selectedType;
+      
       filtered = filtered.filter(event =>
-        event.categories.some(cat => cat.title === selectedType)
+        event.categories.some(cat => cat.title === selectedTypeEn || cat.title === selectedType)
       );
     }
 
-    // Region filter (global)
     if (selectedRegion !== 'all') {
       filtered = filtered.filter(event => {
         const coords = event.geometry?.[0]?.coordinates; 
@@ -104,7 +195,6 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
       });
     }
 
-    // Date filters
     if (dateFrom) {
       filtered = filtered.filter(event => {
         const eventDate = new Date(event.geometry[0]?.date || '');
@@ -122,9 +212,8 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     return filtered.sort((a, b) =>
       new Date(b.geometry[0]?.date || '').getTime() - new Date(a.geometry[0]?.date || '').getTime()
     );
-  }, [events, searchTerm, selectedType, selectedRegion, dateFrom, dateTo]);
+  }, [processedEvents, searchTerm, selectedType, selectedRegion, dateFrom, dateTo, categoryMapPtToEn]);
 
-  // Pagination
   const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedEvents = filteredEvents.slice(startIndex, startIndex + ITEMS_PER_PAGE);

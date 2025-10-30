@@ -8,7 +8,7 @@ const [history, setHistory] = useState([]);
 const [showHistory, setShowHistory] = useState(false);
 const inputRef = useRef();
 
-// 🔹 1. Buscar histórico quando o usuário clicar no campo
+// Search history when the user clicks on the field
 const handleFocus = async () => {
 try {
 const res = await axios.get("http://localhost:5000/api/history");
@@ -19,12 +19,12 @@ console.error("Erro ao carregar histórico:", err);
 }
 };
 
-// 🔹 2. Atualizar valor enquanto digita
+// Update value as you type
 const handleInputChange = (e) => {
 setValue(e.target.value);
 };
 
-// 🔹 3. Registrar busca ao pressionar Enter
+// Register search when pressing Enter
 const handleKeyDown = async (e) => {
 if (e.key === "Enter" && value.trim()) {
 try {
@@ -37,13 +37,13 @@ setShowHistory(false);
 }
 };
 
-// 🔹 4. Permitir clicar em um termo anterior
+// Allows to click on a previous term
 const handleSelectHistory = (query) => {
 setValue(query);
 setShowHistory(false);
 };
 
-// 🔹 5. Fechar a lista ao clicar fora
+// Closes the list when clicking outside
 useEffect(() => {
 const handleClickOutside = (event) => {
 if (inputRef.current && !inputRef.current.contains(event.target)) {
