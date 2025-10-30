@@ -9,8 +9,64 @@ import { Separator } from '../../components/atoms/separator';
 import { SatelliteImageCarousel } from './SatelliteImageCarousel';
 import { toast } from 'sonner';
 import { Event } from '../../types/event';
-import { useEffect, useState } from "react";
 import { SatelliteImage } from "../../types/event";
+import { useEffect, useState } from "react";
+
+// 🔹 Cache simples para evitar várias requisições iguais
+const cache = new Map<string, string>();
+
+// 🔹 Componente auxiliar para converter coordenadas em nome do local
+function LocationDisplay({ lat, lng }: { lat: number; lng: number }) {
+  const [address, setAddress] = useState<string>("Carregando localização...");
+
+  useEffect(() => {
+    async function fetchAddress() {
+      if (!lat || !lng) {
+        setAddress("Coordenadas inválidas");
+        return;
+      }
+
+      const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+      if (cache.has(key)) {
+        setAddress(cache.get(key)!);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+        );
+        const data = await response.json();
+
+        if (data && data.address) {
+          const { city, town, village, state, country } = data.address;
+          const locationName = [city || town || village, state, country]
+            .filter(Boolean)
+            .join(", ");
+
+          const result = locationName || "Localização não encontrada";
+
+          cache.set(key, result);
+          setAddress(result);
+        } else {
+          setAddress("Localização não encontrada");
+        }
+      } catch (error) {
+        console.error("Erro ao obter localização:", error);
+        setAddress("Erro ao obter localização");
+      }
+    }
+
+    fetchAddress();
+  }, [lat, lng]);
+
+  return (
+    <div className="text-slate-400 text-sm">
+      Localização: {address}
+    </div>
+  );
+}
+
 
 interface EventDetailsProps {
   event: Event;
@@ -261,9 +317,8 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
                       <div className="text-white font-medium">
                         {formatDate(coord.date)}
                       </div>
-                      <div className="text-slate-400 text-sm">
-                        Coordenadas: {coord.lat.toFixed(4)}°, {coord.lng.toFixed(4)}°
-                      </div>
+                      <LocationDisplay lat={coord.lat} lng={coord.lng} />
+
                       {index === 0 && (
                         <Badge className="mt-2 bg-green-500/20 text-green-300 border-green-500/30">
                           Mais recente
@@ -329,9 +384,8 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
               <div className="space-y-3">
                 {coordinates.slice(0, 3).map((coord, index) => (
                   <div key={index} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/30">
-                    <div className="text-slate-300 font-medium">
-                      {coord.lat.toFixed(4)}°, {coord.lng.toFixed(4)}°
-                    </div>
+                    <LocationDisplay lat={coord.lat} lng={coord.lng} />
+
                     <div className="text-slate-400 text-sm">
                       {new Date(coord.date).toLocaleDateString('pt-BR')}
                     </div>
