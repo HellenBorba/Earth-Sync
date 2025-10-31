@@ -20,6 +20,7 @@ import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
 import { technologies, features, nasaLinks } from '../../utils/aboutData';
 import { useExternalLink } from '../../hooks/useExternalLink';
 
+// about page displaying purpose, features, technologies, and credits
 export function AboutPage() {
 
   const { openExternalLink } = useExternalLink(); 
@@ -28,7 +29,7 @@ export function AboutPage() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
+      {/* hero section with project title and main buttons */}
       <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20 p-8 overflow-hidden relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
@@ -52,7 +53,7 @@ export function AboutPage() {
                 atualizadas sobre eventos naturais ao redor do mundo.
               </p>
             </div>
-
+            {/* main action buttons */}
             <div className="flex flex-wrap gap-3">
               <Button 
                 className="bg-[rgba(42,72,137,1)] hover:bg-blue-700 text-white"
@@ -72,7 +73,7 @@ export function AboutPage() {
               </Button>
             </div>
           </div>
-
+          {/* hero image */}
           <div className="relative">
             <ImageWithFallback
               src="https://images.unsplash.com/photo-1636565214233-6d1019dfbc36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXNhJTIwZWFydGglMjBvYnNlcnZhdGlvbnxlbnwxfHx8fDE3NTc2MDI3MzV8MA&ixlib=rb-4.1.0&q=80&w=1080"
@@ -84,14 +85,15 @@ export function AboutPage() {
         </div>
       </Card>
 
-      {/* Purpose and Mission */}
+      {/* purpose and mission section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* purpose card */}
         <Card className="bg-slate-900/50 border-slate-700/50 p-6">
           <h2 className="text-2xl text-white mb-4 flex items-center gap-3">
             <Globe className="w-6 h-6 text-blue-400" />
             Propósito
           </h2>
-          
+
           <div className="space-y-4 text-slate-300">
             <p>
               O EarthSync foi desenvolvido para democratizar o acesso às informações 
@@ -115,6 +117,7 @@ export function AboutPage() {
           </div>
         </Card>
 
+        {/* features card */}
         <Card className="bg-slate-900/50 border-slate-700/50 p-6">
           <h2 className="text-2xl text-white mb-4 flex items-center gap-3">
             <Zap className="w-6 h-6 text-green-400" />
@@ -140,7 +143,7 @@ export function AboutPage() {
         </Card>
       </div>
 
-      {/* Technologies */}
+      {/* technologies section */}
       <Card className="bg-slate-900/50 border-slate-700/50 p-6">
         <h2 className="text-2xl text-white mb-6 flex items-center gap-3">
           <Code className="w-6 h-6 text-purple-400" />
@@ -163,7 +166,7 @@ export function AboutPage() {
         </div>
       </Card>
 
-      {/* NASA Credits and Links */}
+      {/* nasa credits and useful links */}
       <Card className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-500/30 p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-blue-600/20 rounded-xl">

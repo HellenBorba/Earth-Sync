@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../components/atoms/
 import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event } from '../../types/event';
 import { EventCard } from '../../components/molecules/EventCard';
-import { tCategory } from '../../utils/i18n'; // Adicionado tCategory
+import { tCategory } from '../../utils/categoryTranslator'; // Adicionado tCategory
 
 interface FeedPageProps {
   events: Event[];
@@ -19,6 +19,7 @@ const ITEMS_PER_PAGE = 9;
 
 export function FeedPage({ events, onEventClick }: FeedPageProps) {
   
+  // state for processed events and filters
   const [processedEvents, setProcessedEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -27,7 +28,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Mapping from English to Portuguese
+   // mapping from english to portuguese categories
   const categoryMapPtToEn: Record<string, string> = useMemo(() => {
     return {
       'Incêndios': 'Wildfires',
@@ -47,6 +48,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     };
   }, []);
 
+  // process event titles and translations
   useEffect(() => {
     if (events && events.length > 0) {
       const processed = events.map(event => {
@@ -55,7 +57,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
 
         let translatedTitle = event.title;
 
-        // Treats plurals and compound nouns first
+        // replace specific words and plurals
         translatedTitle = translatedTitle
           .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
           .replace(/\bSevere Storm(s)?\b/gi, 'Tempestade Severa')
@@ -64,7 +66,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
           .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
           .replace(/\bWater Color\b/gi, 'Cor da Água');
 
-        // Treats simple words (singular/plural) first
+        // treats simple words (singular/plural) first
         translatedTitle = translatedTitle
           .replace(/\bWildfire(s)?\b/gi, 'Incêndio')
           .replace(/\bFire(s)?\b/gi, 'Incêndio')
@@ -81,7 +83,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
           .replace(/\bIce\b/gi, 'Gelo')
           .replace(/\bManmade\b/gi, 'Ação Humana');
 
-        // Reorder logic
+        // reorder title if location is present
         const hasLocation = /,|\bfrom\b|\bin\b/i.test(translatedTitle);
         if (hasLocation) {
           const regexEvent = /^(.*?)(Incêndio|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento|Névoa|Gelo|Ação Humana)(.*)$/i;
@@ -90,8 +92,6 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
             const before = match[1].trim();
             const disaster = match[2].trim();
             const after = match[3].trim();
-            
-            // Simplified reordering logic
             if (before && after) {
               translatedTitle = `${disaster} em ${before.replace(/[-,]+$/, '')}${after ? ', ' + after : ''}`;
             } else if (before) {
@@ -102,7 +102,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
           }
         }
 
-        // Translate category within title if necessary (fallback)
+        // fallback category translation
         if (mainCategoryTitleEn && mainCategoryTitlePt && mainCategoryTitleEn !== mainCategoryTitlePt) {
           const regex = new RegExp(mainCategoryTitleEn, 'gi');
           translatedTitle = translatedTitle.replace(regex, mainCategoryTitlePt);
@@ -117,15 +117,13 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     }
   }, [events]);
 
-  // Extracts unique event types, TRANSLATED to SELECT
+  // extract unique event types
   const eventTypes = useMemo(() => {
-    // Get the unique categories in ENGLISH from processedEvents
     const typesEn = [...new Set(processedEvents.flatMap(event => event.categories.map(cat => cat.title)))];
-    // Translates for display in the processedEvents filterS
     return typesEn.map(tCategory);
   }, [processedEvents]);
 
-  // Region mapping functions (USING processedEvents)
+  // extract unique regions
   const regions = useMemo(() => {
     const regionMapping = (event: Event): string => {
       const coords = event.geometry?.[0]?.coordinates as [number, number];
@@ -150,11 +148,10 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   }, [processedEvents]);
 
 
-  // Filtering using processedEvents and PT -> EN conversion
+   // filter events based on search, type, region and dates
   const filteredEvents = useMemo(() => {
     let filtered = processedEvents;
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(event =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -162,7 +159,6 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
       );
     }
 
-    // Type filter
     if (selectedType !== 'all') {
       const selectedTypeEn = categoryMapPtToEn[selectedType] || selectedType;
       
@@ -218,6 +214,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedEvents = filteredEvents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
+  // reset all filters
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedType('all');

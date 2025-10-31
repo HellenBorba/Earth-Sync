@@ -13,7 +13,7 @@ interface GlobalMapOverviewProps {
 export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: GlobalMapOverviewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Event type colors for markers
+  // get color for event marker
   const getEventColor = (event: Event) => {
     const category = event.categories[0]?.title;
     switch (category) {
@@ -27,7 +27,7 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
     }
   };
 
-  // Simple coordinate to pixel conversion for world map
+  // convert coordinates to map pixels
   const coordsToPixel = (coords: [number, number], mapWidth: number, mapHeight: number) => {
     const [lng, lat] = coords;
     const x = ((lng + 180) * mapWidth) / 360;
@@ -40,19 +40,16 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
 
     const map = mapRef.current;
     const rect = map.getBoundingClientRect();
-    
-    // Clear existing markers
     const existingMarkers = map.querySelectorAll('.event-marker');
     existingMarkers.forEach(marker => marker.remove());
 
-    // Add event markers
+    // add markers for each event
     events.forEach(event => {
       const coords = event.geometry[0]?.coordinates;
       if (!coords) return;
 
       const [x, y] = coordsToPixel(coords, rect.width, rect.height);
       
-      // Skip if coordinates are outside visible area
       if (x < 0 || x > rect.width || y < 0 || y > rect.height) return;
 
       const marker = document.createElement('div');
@@ -78,6 +75,7 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
     });
   }, [events, onEventSelect]);
 
+  // compute severity stats
   const severityStats = {
     high: events.filter(e => e.severity === 'high').length,
     medium: events.filter(e => e.severity === 'medium').length,

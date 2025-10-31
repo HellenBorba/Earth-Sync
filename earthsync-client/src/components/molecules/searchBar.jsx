@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 
+// search bar component with history feature
 export default function SearchBar({ placeholder = "Pesquisar eventos..." }) {
 const [value, setValue] = useState("");
 const [history, setHistory] = useState([]);
 const [showHistory, setShowHistory] = useState(false);
 const inputRef = useRef();
 
-// Search history when the user clicks on the field
+// fetch history from backend on input focus
 const handleFocus = async () => {
 try {
 const res = await axios.get("http://localhost:5000/api/history");
@@ -19,12 +20,12 @@ console.error("Erro ao carregar histórico:", err);
 }
 };
 
-// Update value as you type
+// update input value on change
 const handleInputChange = (e) => {
 setValue(e.target.value);
 };
 
-// Register search when pressing Enter
+// handle enter key to save search in history
 const handleKeyDown = async (e) => {
 if (e.key === "Enter" && value.trim()) {
 try {
@@ -37,13 +38,13 @@ setShowHistory(false);
 }
 };
 
-// Allows to click on a previous term
+// select a previous search from history
 const handleSelectHistory = (query) => {
 setValue(query);
 setShowHistory(false);
 };
 
-// Closes the list when clicking outside
+ // close history dropdown when clicking outside
 useEffect(() => {
 const handleClickOutside = (event) => {
 if (inputRef.current && !inputRef.current.contains(event.target)) {
