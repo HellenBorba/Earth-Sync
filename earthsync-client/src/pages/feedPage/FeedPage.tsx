@@ -8,7 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../components/atoms/
 import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event } from '../../types/event';
 import { EventCard } from '../../components/molecules/EventCard';
-import { tCategory } from '../../utils/categoryTranslator'; // Adicionado tCategory
+import { tCategory } from '../../utils/categoryTranslator'; // Added tCategory
+import { useProcessedEvents } from '../../hooks/useProcessedEvents';
 
 interface FeedPageProps {
   events: Event[];
@@ -18,9 +19,9 @@ interface FeedPageProps {
 const ITEMS_PER_PAGE = 9;
 
 export function FeedPage({ events, onEventClick }: FeedPageProps) {
-  
-  // state for processed events and filters
-  const [processedEvents, setProcessedEvents] = useState<Event[]>([]);
+
+    const { processedEvents, eventTypes, regions, categoryMapPtToEn } = useProcessedEvents(events);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
@@ -28,127 +29,8 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
 
-   // mapping from english to portuguese categories
-  const categoryMapPtToEn: Record<string, string> = useMemo(() => {
-    return {
-      'Incêndios': 'Wildfires',
-      'Tempestades Severas': 'Severe Storms',
-      'Ciclone Tropical': 'Tropical Cyclone',
-      'Ciclones Tropicais': 'Tropical Cyclones',
-      'Terremotos': 'Earthquakes',
-      'Inundações': 'Floods',
-      'Vulcões': 'Volcanoes',
-      'Névoa e Poeira': 'Dust and Haze',
-      'Secas': 'Drought',
-      'Deslizamentos': 'Landslides',
-      'Nevascas': 'Snow',
-      'Ações Humanas': 'Manmade',
-      'Gelo Marinho e Lacustre': 'Sea and Lake Ice',
-      'Temperatura Extrema': 'Extreme Temperature',
-    };
-  }, []);
-
-  // process event titles and translations
-  useEffect(() => {
-    if (events && events.length > 0) {
-      const processed = events.map(event => {
-        const mainCategoryTitleEn = event.categories[0]?.title || '';
-        const mainCategoryTitlePt = tCategory(mainCategoryTitleEn);
-
-        let translatedTitle = event.title;
-
-        // replace specific words and plurals
-        translatedTitle = translatedTitle
-          .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
-          .replace(/\bSevere Storm(s)?\b/gi, 'Tempestade Severa')
-          .replace(/\bSea and Lake Ice\b/gi, 'Gelo Marinho e Lacustre')
-          .replace(/\bDust and Haze\b/gi, 'Névoa e Poeira')
-          .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
-          .replace(/\bWater Color\b/gi, 'Cor da Água');
-
-        // treats simple words (singular/plural) first
-        translatedTitle = translatedTitle
-          .replace(/\bWildfire(s)?\b/gi, 'Incêndio')
-          .replace(/\bFire(s)?\b/gi, 'Incêndio')
-          .replace(/\bFlood(s)?\b/gi, 'Inundação')
-          .replace(/\bEarthquake(s)?\b/gi, 'Terremoto')
-          .replace(/\bVolcano(es)?\b/gi, 'Vulcão')
-          .replace(/\bStorm(s)?\b/gi, 'Tempestade')
-          .replace(/\bCyclone(s)?\b/gi, 'Ciclone')
-          .replace(/\bDrought(s)?\b/gi, 'Seca')
-          .replace(/\bSnow(s)?\b/gi, 'Nevasca')
-          .replace(/\bLandslide(s)?\b/gi, 'Deslizamento')
-          .replace(/\bDust\b/gi, 'Poeira')
-          .replace(/\bHaze\b/gi, 'Névoa')
-          .replace(/\bIce\b/gi, 'Gelo')
-          .replace(/\bManmade\b/gi, 'Ação Humana');
-
-        // reorder title if location is present
-        const hasLocation = /,|\bfrom\b|\bin\b/i.test(translatedTitle);
-        if (hasLocation) {
-          const regexEvent = /^(.*?)(Incêndio|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento|Névoa|Gelo|Ação Humana)(.*)$/i;
-          const match = translatedTitle.match(regexEvent);
-          if (match) {
-            const before = match[1].trim();
-            const disaster = match[2].trim();
-            const after = match[3].trim();
-            if (before && after) {
-              translatedTitle = `${disaster} em ${before.replace(/[-,]+$/, '')}${after ? ', ' + after : ''}`;
-            } else if (before) {
-              translatedTitle = `${disaster} em ${before}`;
-            } else {
-              translatedTitle = disaster;
-            }
-          }
-        }
-
-        // fallback category translation
-        if (mainCategoryTitleEn && mainCategoryTitlePt && mainCategoryTitleEn !== mainCategoryTitlePt) {
-          const regex = new RegExp(mainCategoryTitleEn, 'gi');
-          translatedTitle = translatedTitle.replace(regex, mainCategoryTitlePt);
-        }
-
-        return { ...event, title: translatedTitle };
-      });
-
-      setProcessedEvents(processed);
-    } else {
-      setProcessedEvents([]);
-    }
-  }, [events]);
-
-  // extract unique event types
-  const eventTypes = useMemo(() => {
-    const typesEn = [...new Set(processedEvents.flatMap(event => event.categories.map(cat => cat.title)))];
-    return typesEn.map(tCategory);
-  }, [processedEvents]);
-
-  // extract unique regions
-  const regions = useMemo(() => {
-    const regionMapping = (event: Event): string => {
-      const coords = event.geometry?.[0]?.coordinates as [number, number];
-      if (!coords) return 'Desconhecida';
-      const [lng, lat] = coords;
-
-      if (lat >= 60) return 'Ártico';
-      if (lat <= -60) return 'Antártida';
-      if (lat > 0 && lng < -30) return 'América do Norte';
-      if (lat < 0 && lng < -30) return 'América do Sul';
-      if (lat > 0 && lng >= -30 && lng < 60) return 'Europa';
-      if (lat < 0 && lng >= -30 && lng < 60) return 'África';
-      if (lat > 0 && lng >= 60) return 'Ásia';
-      if (lat < 0 && lng >= 60) return 'Oceania';
-
-      return lat > 0 ? 'Norte' : 'Sul';
-    };
-
-    return [...new Set(
-      processedEvents.map(e => regionMapping(e)) 
-    )];
-  }, [processedEvents]);
-
-
-   // filter events based on search, type, region and dates
+   
+// filter events based on search, type, region and dates
   const filteredEvents = useMemo(() => {
     let filtered = processedEvents;
 
