@@ -46,6 +46,7 @@ export default function App() {
     string | null
   >(null);
 
+  // fetch events from api
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
@@ -61,24 +62,22 @@ export default function App() {
     setIsLoading(false);
   };
 
-  // Handle URL routing
+   // handle hash based routing
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-
-      // Check for event details route
       const eventMatch = hash.match(/^#\/evento\/(.+)$/);
+
       if (eventMatch) {
         const eventId = decodeURIComponent(eventMatch[1]);
         setCurrentEventId(eventId);
 
-        // Find and set the selected event
         const event = events.find((e) => e.id === eventId);
+
         if (event) {
           setSelectedEvent(event);
           setView("details");
         } else if (events.length > 0) {
-          // Event not found, redirect to dashboard
           window.location.hash = "";
           setView("main");
           setCurrentPage("dashboard");
@@ -86,7 +85,6 @@ export default function App() {
         return;
       }
 
-      // Check for other routes
       if (hash === "#/feed") {
         setCurrentPage("feed");
         setView("main");
@@ -98,7 +96,6 @@ export default function App() {
         setCurrentEventId(null);
         setSelectedEvent(null);
       } else {
-        // Default to dashboard
         setCurrentPage("dashboard");
         setView("main");
         setCurrentEventId(null);
@@ -106,10 +103,7 @@ export default function App() {
       }
     };
 
-    // Handle initial load
     handleHashChange();
-
-    // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
     return () =>
       window.removeEventListener(
@@ -118,38 +112,39 @@ export default function App() {
       );
   }, [events]);
 
+  // initial fetch and polling
   useEffect(() => {
     fetchEvents();
 
-    // Set up polling for real-time updates (every 5 minutes)
+    // set up polling for real-time updates (every 5 minutes)
     const interval = setInterval(fetchEvents, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
+  // select event
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
     setCurrentEventId(event.id);
     setView("details");
-    // Update URL without page reload
     window.location.hash = `#/evento/${encodeURIComponent(event.id)}`;
   };
 
+  // back to main view
   const handleBackToDashboard = () => {
     setSelectedEvent(null);
     setCurrentEventId(null);
     setView("main");
-    // Return to the previous page or dashboard
     const previousPage = currentPage === "feed" ? "#/feed" : "";
     window.location.hash = previousPage;
   };
 
+  // navigate pages
   const handleNavigate = (page: string) => {
     setCurrentPage(page as "dashboard" | "feed" | "sobre");
     setView("main");
     setSelectedEvent(null);
     setCurrentEventId(null);
 
-    // Update URL
     const routes = {
       dashboard: "",
       feed: "#/feed",
@@ -159,14 +154,17 @@ export default function App() {
       routes[page as keyof typeof routes] || "";
   };
 
+  // select event from map
   const handleMapEventSelect = (event: Event) => {
     setSelectedEvent(event);
   };
 
+  // switch to full map tab
   const handleViewFullMap = () => {
     setActiveTab("map");
   };
 
+  // render details view
   if (view === "details" && selectedEvent) {
     return (
       <>

@@ -12,10 +12,10 @@ import { Event } from '../../types/event';
 import { SatelliteImage } from "../../types/event";
 import { useEffect, useState } from "react";
 
-// 🔹 Cache simples para evitar várias requisições iguais
+// cache for location names
 const cache = new Map<string, string>();
 
-// 🔹 Componente auxiliar para converter coordenadas em nome do local
+// display address from coordinates
 function LocationDisplay({ lat, lng }: { lat: number; lng: number }) {
   const [address, setAddress] = useState<string>("Carregando localização...");
 
@@ -67,12 +67,13 @@ function LocationDisplay({ lat, lng }: { lat: number; lng: number }) {
   );
 }
 
-
+// props for event details
 interface EventDetailsProps {
   event: Event;
   onBack: () => void;
 }
 
+// format date string
 function formatDate(dateStr: string) {
   const date = new Date(dateStr);
   return date.toLocaleString('pt-BR', {
@@ -84,7 +85,7 @@ function formatDate(dateStr: string) {
   });
 }
 
-/** Basic translation for event titles/categories */
+// translate event titles to readable format
 function translateEventTitle(title: string): string {
   let t = title;
 
@@ -106,7 +107,6 @@ function translateEventTitle(title: string): string {
     .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
     .replace(/\bManmade\b/gi, 'Causado por Humanos');
 
-  // Rearranges “Fire in X…”
   const match = t.match(/^(.*?)(Incêndio|Queima Controlada|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento)(.*)$/i);
   if (match) {
     const before = match[1].trim().replace(/^[,.\s]+/, '').replace(/[,.\s]+$/, '');
@@ -118,10 +118,12 @@ function translateEventTitle(title: string): string {
   return t;
 }
 
+// main component for event details
 export function EventDetails({ event, onBack }: EventDetailsProps) {
   const [images, setImages] = useState<SatelliteImage[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // load event images from api
   useEffect(() => {
     const API = 'http://localhost:5000';
     async function loadImages() {
@@ -141,6 +143,7 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
     loadImages();
   }, [event.id]);
 
+  // get color by event type
   const getEventTypeColor = (category: string) => {
     const colors: Record<string, string> = {
       'Wildfires': 'from-red-500/20 to-orange-500/20 border-red-500/50',
@@ -160,6 +163,7 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
     return colors[category] || 'from-slate-500/20 to-gray-500/20 border-slate-500/50';
   };
 
+  // get all coordinates from event
   const getAllCoordinates = () => {
     if (!event.geometry) return [];
     return event.geometry.map(geom => ({
@@ -174,6 +178,7 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
   const translatedCategory = translateEventTitle(category);
   const translatedTitle = translateEventTitle(event.title);
 
+  // share event url
   const handleShare = () => {
     const eventUrl = `${window.location.origin}${window.location.pathname}#/evento/${encodeURIComponent(event.id)}`;
     if (navigator.share) {
@@ -187,6 +192,7 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
     }
   };
 
+  // copy text to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast.success('Link copiado para a área de transferência!', {
@@ -197,6 +203,7 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
     });
   };
 
+  // get color for severity
   const getSeverityColor = (severity?: string) => {
     const colors = {
       'low': 'bg-green-500/20 text-green-300 border-green-500/30',
@@ -207,6 +214,7 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
     return colors[severity as keyof typeof colors] || 'bg-slate-500/20 text-slate-300 border-slate-500/30';
   };
 
+  // get icon for severity
   const getSeverityIcon = (severity?: string) => {
     switch (severity) {
       case 'low': return <TrendingUp className="w-3 h-3" />;

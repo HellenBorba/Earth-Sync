@@ -8,6 +8,7 @@ interface MapViewProps {
 }
 
 export function MapView({ events, selectedEvent, onEventSelect }: MapViewProps) {
+  // get color for marker based on category
   const getMarkerColor = (category: string) => {
     const colors: Record<string, string> = {
       'Wildfires': 'bg-red-500',
@@ -27,17 +28,19 @@ export function MapView({ events, selectedEvent, onEventSelect }: MapViewProps) 
     return colors[category] || 'bg-slate-500';
   };
 
+  // normalize coordinate to percent
   const normalizeCoordinate = (value: number, min: number, max: number) => {
     return ((value - min) / (max - min)) * 100;
   };
 
+  // filter events with coordinates
   const eventsWithCoords = events.filter(event => 
     event.geometry && 
     event.geometry.length > 0 && 
     event.geometry[0].coordinates
   );
 
-  // Calculate bounds for positioning markers
+  // calculate bounds for positioning markers
   const lats = eventsWithCoords.map(e => e.geometry[0].coordinates[1]);
   const lngs = eventsWithCoords.map(e => e.geometry[0].coordinates[0]);
   
