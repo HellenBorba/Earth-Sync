@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
 import axios from "axios";
-import cache from "../utils/cache"; // ← ajuste aqui
+import cache from "../utils/cache"; 
 
 const router = express.Router();
 
 const EONET_BASE = "https://eonet.gsfc.nasa.gov/api/v3/events";
 
-// Tipagem básica para geometria de evento
+// basic event geometry type
 interface Geometry {
   coordinates: [number, number];
   date: string;
@@ -18,13 +18,13 @@ interface Event {
   description?: string;
   categories?: any[];
   geometry?: Geometry[];
-  [key: string]: any; // para campos adicionais
+  [key: string]: any; 
 }
 
-// Função utilitária para buscar evento por ID, usando cache
+// get event by id using cache
 async function getEventById(id: string): Promise<Event> {
   const cacheKey = `event-${id}`;
-  const cachedData = cache.get<Event>(cacheKey); // ⬅️ diz que o cache retorna um Event
+  const cachedData = cache.get<Event>(cacheKey); 
   if (cachedData) return cachedData;
 
   const response = await axios.get(`${EONET_BASE}/${id}`);
@@ -33,7 +33,7 @@ async function getEventById(id: string): Promise<Event> {
   return event;
 }
 
-// Função utilitária para gerar imagem do evento
+// generate nasa gibs image for event
 function generateEventImage(event: Event, id: string) {
   const geom = event.geometry?.[0];
   if (!geom) return [];
@@ -57,7 +57,7 @@ function generateEventImage(event: Event, id: string) {
   ];
 }
 
-// Listar eventos com filtro
+// list events with optional filters
 router.get("/", async (req: Request, res: Response) => {
   try {
     const { category, start, end } = req.query as {
@@ -90,7 +90,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// Endpoint unificado para detalhes e imagens
+// get event details with optional images
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
