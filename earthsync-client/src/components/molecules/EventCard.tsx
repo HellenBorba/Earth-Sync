@@ -4,7 +4,7 @@ import { MapPin, Calendar, Zap, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '../atoms/button';
 import { Event } from '../../types/event';
 import { ImageWithFallback } from '../atoms/ImageWithFallback';
-import { tCategory } from '../../utils/i18n';
+import { tCategory } from '../../utils/categoryTranslator';
 
 interface EventCardProps {
   event: Event;

@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../components/atoms/
 import { CalendarIcon, MapPin, Clock, Filter, Search, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Event } from '../../types/event';
 import { EventCard } from '../../components/molecules/EventCard';
-import { tCategory } from '../../utils/i18n'; // Adicionado tCategory
+import { tCategory } from '../../utils/categoryTranslator'; // Adicionado tCategory
 
 interface FeedPageProps {
   events: Event[];
