@@ -47,3 +47,26 @@ export function renderMapMarkers(mapElement: HTMLDivElement, events: Event[], on
     mapElement.appendChild(marker);
   });
 }
+
+export function getMarkerColor(category: string): string {
+  const colors: Record<string, string> = {
+    "Wildfires": "bg-red-500",
+    "Severe Storms": "bg-purple-500",
+    "Volcanoes": "bg-orange-500",
+    "Earthquakes": "bg-yellow-500",
+    "Floods": "bg-blue-500",
+    "Droughts": "bg-amber-500",
+    "Dust and Haze": "bg-gray-500",
+    "Snow": "bg-cyan-500",
+    "Water Color": "bg-teal-500",
+    "Landslides": "bg-stone-500",
+    "Manmade": "bg-rose-500",
+    "Sea and Lake Ice": "bg-indigo-500",
+    "Temperature Extremes": "bg-pink-500",
+  };
+  return colors[category] || "bg-slate-500";
+}
+
+export function normalizeCoordinate(value: number, min: number, max: number) {
+  return ((value - min) / (max - min)) * 100;
+}

@@ -1,5 +1,6 @@
 import { Event } from '../types/event';
 import { MapPin } from 'lucide-react';
+import { getMarkerColor, normalizeCoordinate } from '../../utils/mapMarkers';
 
 interface MapViewProps {
   events: Event[];
@@ -8,31 +9,7 @@ interface MapViewProps {
 }
 
 export function MapView({ events, selectedEvent, onEventSelect }: MapViewProps) {
-  // get color for marker based on category
-  const getMarkerColor = (category: string) => {
-    const colors: Record<string, string> = {
-      'Wildfires': 'bg-red-500',
-      'Severe Storms': 'bg-purple-500',
-      'Volcanoes': 'bg-orange-500',
-      'Earthquakes': 'bg-yellow-500',
-      'Floods': 'bg-blue-500',
-      'Droughts': 'bg-amber-500',
-      'Dust and Haze': 'bg-gray-500',
-      'Snow': 'bg-cyan-500',
-      'Water Color': 'bg-teal-500',
-      'Landslides': 'bg-stone-500',
-      'Manmade': 'bg-rose-500',
-      'Sea and Lake Ice': 'bg-indigo-500',
-      'Temperature Extremes': 'bg-pink-500',
-    };
-    return colors[category] || 'bg-slate-500';
-  };
-
-  // normalize coordinate to percent
-  const normalizeCoordinate = (value: number, min: number, max: number) => {
-    return ((value - min) / (max - min)) * 100;
-  };
-
+  
   // filter events with coordinates
   const eventsWithCoords = events.filter(event => 
     event.geometry && 
