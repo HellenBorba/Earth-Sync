@@ -3,6 +3,7 @@ import { Event } from '../../types/event';
 import { MapPin, Eye } from 'lucide-react';
 import { Button } from '../../components/atoms/button';
 import { Card } from '../../components/atoms/card';
+import { renderMapMarkers } from '../../utils/mapMarkers';
 
 interface GlobalMapOverviewProps {
   events: Event[];
@@ -13,67 +14,12 @@ interface GlobalMapOverviewProps {
 export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: GlobalMapOverviewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // get color for event marker
-  const getEventColor = (event: Event) => {
-    const category = event.categories[0]?.title;
-    switch (category) {
-      case 'Wildfires': return '#ef4444'; // red-500
-      case 'Severe Storms': return '#3b82f6'; // blue-500
-      case 'Earthquakes': return '#eab308'; // yellow-500
-      case 'Floods': return '#06b6d4'; // cyan-500
-      case 'Volcanoes': return '#f97316'; // orange-500
-      case 'Dust and Haze': return '#8b5cf6'; // violet-500
-      default: return '#64748b'; // slate-500
-    }
-  };
-
-  // convert coordinates to map pixels
-  const coordsToPixel = (coords: [number, number], mapWidth: number, mapHeight: number) => {
-    const [lng, lat] = coords;
-    const x = ((lng + 180) * mapWidth) / 360;
-    const y = ((90 - lat) * mapHeight) / 180;
-    return [x, y];
-  };
-
   useEffect(() => {
     if (!mapRef.current) return;
+    renderMapMarkers(mapRef.current, events, onEventSelect || (() => {}));
 
-    const map = mapRef.current;
-    const rect = map.getBoundingClientRect();
-    const existingMarkers = map.querySelectorAll('.event-marker');
-    existingMarkers.forEach(marker => marker.remove());
+  }, [events]);
 
-    // add markers for each event
-    events.forEach(event => {
-      const coords = event.geometry[0]?.coordinates;
-      if (!coords) return;
-
-      const [x, y] = coordsToPixel(coords, rect.width, rect.height);
-      
-      if (x < 0 || x > rect.width || y < 0 || y > rect.height) return;
-
-      const marker = document.createElement('div');
-      marker.className = 'event-marker absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-125 z-10';
-      marker.style.left = `${x}px`;
-      marker.style.top = `${y}px`;
-      
-      const color = getEventColor(event);
-      
-      marker.innerHTML = `
-        <div class="relative">
-          <div class="w-3 h-3 rounded-full animate-pulse shadow-lg" style="background-color: ${color}; box-shadow: 0 0 10px ${color}50"></div>
-          <div class="absolute inset-0 w-3 h-3 rounded-full animate-ping" style="background-color: ${color}; opacity: 0.4"></div>
-        </div>
-      `;
-
-      marker.title = event.title;
-      marker.addEventListener('click', () => {
-        onEventSelect?.(event);
-      });
-
-      map.appendChild(marker);
-    });
-  }, [events, onEventSelect]);
 
   // compute severity stats
   const severityStats = {
