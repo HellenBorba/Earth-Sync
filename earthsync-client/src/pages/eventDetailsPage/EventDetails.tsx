@@ -11,6 +11,9 @@ import { toast } from 'sonner';
 import { Event } from '../../types/event';
 import { SatelliteImage } from "../../types/event";
 import { useEffect, useState } from "react";
+import { useEventDetails } from '../../hooks/useEventDetails';
+import { formatDate } from '../../utils/formatDate';
+
 
 // cache for location names
 const cache = new Map<string, string>();
@@ -73,18 +76,6 @@ interface EventDetailsProps {
   onBack: () => void;
 }
 
-// format date string
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 // translate event titles to readable format
 function translateEventTitle(title: string): string {
   let t = title;
@@ -119,29 +110,15 @@ function translateEventTitle(title: string): string {
 }
 
 // main component for event details
-export function EventDetails({ event, onBack }: EventDetailsProps) {
-  const [images, setImages] = useState<SatelliteImage[]>([]);
-  const [loading, setLoading] = useState(true);
+export function EventDetails({ event, onBack }: EventDetailsProps) { 
 
-  // load event images from api
-  useEffect(() => {
-    const API = 'http://localhost:5000';
-    async function loadImages() {
-      if (!event?.id) return;
-      setLoading(true);
-      try {
-        const res = await fetch(`${API}/api/events/${event.id}?includeImages=true`);
-        const data = await res.json();
-        setImages(data.images || []);
-      } catch (error) {
-        console.error("Erro ao buscar imagens:", error);
-        setImages([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadImages();
-  }, [event.id]);
+  const {
+  images,
+  loading,
+  coordinates,
+  formatDate,
+} = useEventDetails({ event });
+
 
   // get color by event type
   const getEventTypeColor = (category: string) => {
@@ -173,9 +150,9 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
     }));
   };
 
-  const coordinates = getAllCoordinates();
-  const category = event.categories[0]?.title || 'Desconhecido';
-  const translatedCategory = translateEventTitle(category);
+  //const coordinates = getAllCoordinates();
+ const category = event.categories[0]?.title || 'Desconhecido';
+ const translatedCategory = translateEventTitle(category);
   const translatedTitle = translateEventTitle(event.title);
 
   // share event url

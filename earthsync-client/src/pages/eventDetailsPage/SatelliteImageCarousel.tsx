@@ -1,4 +1,4 @@
-import { useState } from 'react';
+//import { useState } from 'react';
 import { Card } from '../../components/atoms/card';
 import { Button } from '../../components/atoms/button';
 import { Badge } from '../../components/atoms/badge';
@@ -6,22 +6,34 @@ import { ChevronLeft, ChevronRight, ZoomIn, ExternalLink, Download, Calendar, Ca
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../components/atoms/dialog';
 import { SatelliteImage } from '../../types/event';
 import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
+import { useImageCarousel } from '../../hooks/useImageCarousel';
+import { imageTypeColors } from '../../utils/imageTypeColors';
+import { formatDate } from '../../utils/formatDate';
 
 interface SatelliteImageCarouselProps {
   images: SatelliteImage[];
 }
 
-const imageTypeColors: Record<string, string> = {
+/*const imageTypeColors: Record<string, string> = {
   'RGB': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
   'INFRARED': 'bg-red-500/20 text-red-300 border-red-500/30',
   'THERMAL': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
   'WMS': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
   'WMTS': 'bg-green-500/20 text-green-300 border-green-500/30',
-};
+};*/
 
 export function SatelliteImageCarousel({ images }: SatelliteImageCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<SatelliteImage | null>(null);
+    const {
+    currentIndex,
+    selectedImage,
+    setSelectedImage,
+    nextImage,
+    prevImage,
+    currentImage,
+  } = useImageCarousel(images);
+
+  //const [currentIndex, setCurrentIndex] = useState(0);
+  //const [selectedImage, setSelectedImage] = useState<SatelliteImage | null>(null);
 
   if (!images || images.length === 0) {
     return (
@@ -37,17 +49,17 @@ export function SatelliteImageCarousel({ images }: SatelliteImageCarouselProps) 
     );
   }
 
-  const currentImage = images[currentIndex];
+  //const currentImage = currentImage;
 
-  const nextImage = () => {
+  /*const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
+  };*/
 
-  const prevImage = () => {
+ /* const prevImage = () => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  };*/
 
-  const formatDate = (dateString: string) => {
+  /*const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -55,7 +67,7 @@ export function SatelliteImageCarousel({ images }: SatelliteImageCarouselProps) 
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
+  };*/
 
   return (
     <Card className="bg-slate-900/50 border-slate-700/50 overflow-hidden">
