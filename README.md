@@ -1,55 +1,125 @@
-# 🌍 EarthSync  
+# 🌍 EarthSync
+
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow) ![License](https://img.shields.io/badge/license-MIT-blue)
+
 **Rastreador de Desastres Naturais em Tempo Real**
 
----
-
-## 📌 Sobre o Projeto  
-O **EarthSync** é uma aplicação interativa que rastreia e exibe desastres naturais em tempo quase real, utilizando dados da [API EONET da NASA](https://eonet.gsfc.nasa.gov/).  
-
-Com ele, é possível:  
-- Acompanhar eventos recentes em todo o mundo 
-- Visualizar detalhes e imagens de satélite 
-- Filtrar eventos por tipo, data e localização 
+EarthSync é uma plataforma interativa que exibe desastres naturais em tempo quase real usando a API **EONET** da NASA. Permite acompanhar eventos recentes, explorar no mapa, filtrar por tipo, pesquisar com histórico e visualizar estatísticas de forma clara e acessível.
 
 ---
 
-## 🔧 Tecnologias Utilizadas  
-
-- **Frontend**: [React.js](https://react.dev/), Vite 
-- **Backend**: [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)  
-- **Dados**: [NASA EONET API](https://eonet.gsfc.nasa.gov/)  
-
----
-
-## 🚀 Funcionalidades  
-
-- 🌐 Rastreamento em tempo quase real de desastres naturais  
-- 📅 Filtros por tipo, data e localização  
-- 📲 Layout responsivo para dispositivos móveis  
+## 🧑‍💻 Integrantes
+- Hellen Machado Borba  
+- Letícia Beatriz Souza  
+- Maria Luiza Garcia  
+- Noah Freitas Rabelo  
 
 ---
 
-## 🛠️ Instalação e Execução  
+## ⚙️ Tecnologias Utilizadas
 
-### Pré-requisitos  
-- [Node.js](https://nodejs.org/) (>= 18)  
-- [npm](https://www.npmjs.com/) 
+### Frontend
+- React.js + Vite  
+- TypeScript  
+- TailwindCSS  
+- Material UI  
+- Leaflet.js / Mapbox  
 
-### Passos  
+### Backend
+- Node.js + Express  
+- TypeScript  
+- Prisma ORM  
+- MySQL  
+- Swagger  
 
+### Integrações
+- NASA EONET API  
+- Serviços WMS/WMTS (imagens de satélite)  
+
+---
+
+## 🏛 Arquitetura
+
+- **Frontend:** Componentes organizados seguindo Atomic Design.  
+- **Backend:** Arquitetura em camadas, separando responsabilidades.  
+- **Cache inteligente:** Reduz latência e sobrecarga da API.  
+- **Tipagem estática com TypeScript:** Maior confiabilidade e detecção de erros.  
+- **Escalabilidade e acessibilidade:** Design consistente, responsivo e fácil de expandir.  
+
+---
+
+## 📌 Funcionalidades Principais
+
+### Página Inicial (`/`)
+- Lista eventos das últimas 48 horas  
+- Dashboard de contagem por tipo  
+- Mapa interativo com detalhes clicáveis  
+- Barra de pesquisa  
+
+### Página de Detalhes do Evento (`/evento/:id`)
+- Nome, tipo e categoria do evento  
+- Datas, localização e imagens de satélite  
+- Compartilhamento de link  
+- Galeria de imagens (carrossel)  
+
+### Feed de Desastres (`/feed`)
+- Feed de eventos em cards com foto, nome, data e tipo  
+- Filtros por tipo, datas e região  
+- Histórico de pesquisa com MySQL + Prisma  
+- Paginação e links para detalhes  
+
+### Sobre Nós (`/sobre`)
+- Propósito do projeto  
+- Tecnologias utilizadas  
+- Créditos e fontes de dados  
+- Links da documentação da API  
+
+### Recursos Adicionais
+- Responsivo para mobile  
+- Mensagens de erro amigáveis  
+- Cache de dados recentes  
+
+---
+
+## 🚀 Rodando o Projeto
+
+### Frontend
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/earthsync.git
-
-# Acesse a pasta do projeto
-cd earthsync
-
-# Instale as dependências
+cd earthsync-client
 npm install
-
-# Execute em modo de desenvolvimento
 npm run dev
+```
 
-# O app estará disponível em:
-http://localhost:5173 
+## 🖥️ Backend
 
+### Instalação e execução
+```bash
+cd earthsync-server
+npm install
+npm install swagger-ui-express  # Instala dependência do Swagger
+npm run dev
+```
+
+## 💾 Banco de dados
+```bash
+npx prisma migrate dev
+```
+
+---
+
+## 📄 Licença
+MIT License
+
+---
+
+<p align="center">
+  🌍 <strong>EarthSync</strong> &mdash; Rastreador de Desastres Naturais em Tempo Real
+</p>
+
+<p align="center">
+  Feito com ❤️ por Hellen Machado Borba, Letícia Beatriz Souza, Maria Luiza Garcia e Noah Freitas Rabelo
+</p>
+
+<p align="center">
+  <sub>Projetos como este ajudam a tornar dados de desastres naturais mais acessíveis e compreensíveis para todos 🌱</sub>
+</p>
