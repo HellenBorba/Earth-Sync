@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'; 
 import { Card } from '../../components/atoms/card';
 import { Button } from '../../components/atoms/button';
+import { Badge } from '../../components/atoms/badge';
+import { SearchInput } from '../../components/atoms/searchInput';
 import { Input } from '../../components/atoms/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/atoms/select';
 import { Calendar } from '../../components/atoms/calendar';
@@ -10,6 +12,9 @@ import { Event } from '../../types/event';
 import { EventCard } from '../../components/molecules/EventCard';
 import { tCategory } from '../../utils/categoryTranslator'; // Added tCategory
 import { useProcessedEvents } from '../../hooks/useProcessedEvents';
+import { ImageWithFallback } from '../../components/atoms/ImageWithFallback';
+import { formatDate } from '../../utils/formatDate';
+import {ptBR} from 'date-fns/locale';
 
 interface FeedPageProps {
   events: Event[];
@@ -90,7 +95,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
     return filtered.sort((a, b) =>
       new Date(b.geometry[0]?.date || '').getTime() - new Date(a.geometry[0]?.date || '').getTime()
     );
-  }, [processedEvents, searchTerm, selectedType, selectedRegion, dateFrom, dateTo, categoryMapPtToEn]);
+  }, [processedEvents, searchTerm, selectedType, selectedRegion, dateFrom, dateTo, categoryMapPtToEn, events]);
 
   const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -135,19 +140,12 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Buscar eventos..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400"
-            />
-          </div>
+          {/* Search with History*/}
+          <SearchInput
+              value = {searchTerm} onChange = {setSearchTerm}
+              placeholder = "Buscar eventos..."
+              className ='bg-slate-800/50 border-slate-700/50 text-white placeholder-slate-400'
+              storageKey='earth-sync-events-search' maxHistory={8}/>
 
           {/* Event Type */}
           <Select value={selectedType} onValueChange={(value) => {

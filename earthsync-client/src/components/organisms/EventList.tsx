@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { EventCard } from '../molecules/EventCard';
+import { SearchInput } from '../atoms/searchInput';
 import { Input } from '../atoms/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../atoms/select';
 import { Button } from '../atoms/button';
@@ -85,14 +86,12 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Buscar eventos ou categorias..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700/50 text-white placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20"
-            />
-          </div>
+            <SearchInput
+              value = {searchTerm} onChange = {setSearchTerm}
+              placeholder='Pesquisar eventos... '
+              className ='bg-slate-800/50 border-slate-700/50 text-white placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20'
+              storageKey='earth-sync-events-search' maxHistory={8}/>
+              </div>
 
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full sm:w-44 bg-slate-800/50 border-slate-700/50 text-white">
