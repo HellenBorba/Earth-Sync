@@ -9,6 +9,6 @@ datasource db {
 
 model searchHistory {
   id        Int      @id @default(autoincrement())
-  query     String
+  query     String   @unique
   createdAt DateTime @default(now())
 }

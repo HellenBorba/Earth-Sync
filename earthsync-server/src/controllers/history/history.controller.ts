@@ -116,4 +116,49 @@ export const historyController = {
     await historyService.clearAll();
     res.sendStatus(204);
   },
+
+  /**
+ * @swagger
+ * /api/history:
+ *   post:
+ *     summary: Sincroniza o histórico do LocalStorage com o banco
+ *     description: Recebe uma lista de pesquisas e salva cada uma no banco.
+ *     tags: [History]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               terms:
+ *             items:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Histórico sincronizado com sucesso
+ *       500:
+ *         description: Erro interno no servidor
+ */
+sync: async (req: Request, res: Response) => {
+  const {terms} = req.body;
+
+  if (!Array.isArray(terms)) {
+    return res.status(400).json({ error: "O campo 'terms' deve ser uma array de strings" });
+  }
+
+  try {
+    for (const term of terms) {
+      if (term && typeof term === "string" && term.trim() !== "") {
+        await historyService.create(term);
+      }
+    }
+
+    res.status(200).json({ message: "Histórico sincronizado com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao sincronizar histórico" });
+  }
+},
+
 };
