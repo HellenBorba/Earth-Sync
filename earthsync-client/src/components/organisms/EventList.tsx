@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { EventCard } from '../molecules/EventCard';
 import { SearchInput } from '../atoms/searchInput';
-import { Input } from '../atoms/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../atoms/select';
 import { Button } from '../atoms/button';
 import { Badge } from '../atoms/badge';
 import { Search, Filter, Calendar, MapPin, Activity } from 'lucide-react';
 import { Event } from '../../types/event';
+import { tCategory } from '../../utils/categoryTranslator';
 
 interface EventListProps {
   events: Event[];
@@ -19,20 +19,52 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'type'>('date');
 
-  // Get unique categories
+  // Get unique categories (translated)
   const categories = Array.from(
-    new Set(events.flatMap(event => event.categories.map(cat => cat.title)))
+    new Set(events.flatMap(event =>
+      event.categories.map(cat => tCategory(cat.title))
+    ))
   ).sort();
 
-  // Filter and sort events
+  // 🔥 FUNCTION: translate title exactly like EventCard
+  const translateTitle = (title: string) => {
+    return title
+      .replace(/\bTropical Storm(s)?\b/gi, 'Tempestade Tropical')
+      .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
+      .replace(/\bSevere Storm(s)?\b/gi, 'Tempestade Severa')
+      .replace(/\bSea and Lake Ice\b/gi, 'Gelo Marinho e Lacustre')
+      .replace(/\bDust and Haze\b/gi, 'Névoa e Poeira')
+      .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
+      .replace(/\bWildfire(s)?\b/gi, 'Incêndio Florestal')
+      .replace(/\bPrescribed Fire(s)?\b/gi, 'Queima Controlada')
+      .replace(/\bFire(s)?\b/gi, 'Incêndio')
+      .replace(/\bFlood(s)?\b/gi, 'Inundação')
+      .replace(/\bEarthquake(s)?\b/gi, 'Terremoto')
+      .replace(/\bVolcano(es)?\b/gi, 'Vulcão')
+      .replace(/\bDrought(s)?\b/gi, 'Seca')
+      .replace(/\bSnow(s)?\b/gi, 'Nevasca')
+      .replace(/\bLandslide(s)?\b/gi, 'Deslizamento de Terra')
+      .replace(/\bManmade\b/gi, 'Causado por Humanos');
+  };
+
+  // 🔥 Main filter logic (NOW works in Portuguese)
   const filteredEvents = events
     .filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          event.categories.some(cat => cat.title.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesCategory = selectedCategory === 'all' || 
-                            event.categories.some(cat => cat.title === selectedCategory);
-      
+      const translatedTitle = translateTitle(event.title).toLowerCase();
+      const translatedCategories = event.categories.map(cat =>
+        tCategory(cat.title).toLowerCase()
+      );
+
+      const search = searchTerm.toLowerCase();
+
+      const matchesSearch =
+        translatedTitle.includes(search) ||
+        translatedCategories.some(cat => cat.includes(search));
+
+      const matchesCategory =
+        selectedCategory === 'all' ||
+        translatedCategories.includes(selectedCategory.toLowerCase());
+
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
@@ -40,13 +72,16 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
         case 'date':
           const dateA = new Date(a.geometry[0]?.date || 0).getTime();
           const dateB = new Date(b.geometry[0]?.date || 0).getTime();
-          return dateB - dateA; // Most recent first
+          return dateB - dateA;
+
         case 'title':
-          return a.title.localeCompare(b.title);
+          return translateTitle(a.title).localeCompare(translateTitle(b.title));
+
         case 'type':
-          const typeA = a.categories[0]?.title || '';
-          const typeB = b.categories[0]?.title || '';
-          return typeA.localeCompare(typeB);
+          return tCategory(a.categories[0]?.title || '').localeCompare(
+            tCategory(b.categories[0]?.title || '')
+          );
+
         default:
           return 0;
       }
@@ -54,11 +89,9 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="w-8 h-8 mx-auto mb-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400">Carregando eventos em tempo real...</p>
-        </div>
+      <div className="text-center py-12">
+        <div className="w-8 h-8 mx-auto mb-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400">Carregando eventos...</p>
       </div>
     );
   }
@@ -74,24 +107,23 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
               Monitoramento de desastres naturais das últimas 48 horas
             </p>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30">
-              <Activity className="w-3 h-3 mr-1" />
-              {events.length} eventos ativos
-            </Badge>
-          </div>
+
+          <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30">
+            <Activity className="w-3 h-3 mr-1" />
+            {events.length} eventos ativos
+          </Badge>
         </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <SearchInput
-              value = {searchTerm} onChange = {setSearchTerm}
-              placeholder='Pesquisar eventos... '
-              className ='bg-slate-800/50 border-slate-700/50 text-white placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20'
-              storageKey='earth-sync-events-search' maxHistory={8}/>
-              </div>
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Pesquisar eventos..."
+            className="bg-slate-800/50 border-slate-700/50 text-white placeholder-slate-400"
+            storageKey="earth-sync-events-search"
+            maxHistory={10}
+          />
 
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full sm:w-44 bg-slate-800/50 border-slate-700/50 text-white">
@@ -108,7 +140,10 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={(value: 'date' | 'title' | 'type') => setSortBy(value)}>
+          <Select
+            value={sortBy}
+            onValueChange={(value: 'date' | 'title' | 'type') => setSortBy(value)}
+          >
             <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700/50 text-white">
               <SelectValue />
             </SelectTrigger>
@@ -116,8 +151,7 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
               <SelectItem value="date" className="text-white">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span className="hidden sm:inline">Data (mais recente)</span>
-                  <span className="sm:hidden">Data</span>
+                  Data (mais recente)
                 </div>
               </SelectItem>
               <SelectItem value="title" className="text-white">Nome</SelectItem>
@@ -130,37 +164,21 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
         {(searchTerm || selectedCategory !== 'all') && (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-slate-400">Filtros ativos:</span>
-            
+
             {searchTerm && (
-              <Badge 
-                variant="secondary" 
-                className="bg-blue-500/20 text-blue-300 border-blue-500/30"
-              >
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
                 Busca: "{searchTerm}"
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="ml-2 hover:text-blue-200"
-                >
-                  ×
-                </button>
+                <button onClick={() => setSearchTerm('')} className="ml-2">×</button>
               </Badge>
             )}
-            
+
             {selectedCategory !== 'all' && (
-              <Badge 
-                variant="secondary" 
-                className="bg-purple-500/20 text-purple-300 border-purple-500/30"
-              >
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
                 Tipo: {selectedCategory}
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className="ml-2 hover:text-purple-200"
-                >
-                  ×
-                </button>
+                <button onClick={() => setSelectedCategory('all')} className="ml-2">×</button>
               </Badge>
             )}
-            
+
             <Button
               size="sm"
               variant="ghost"
@@ -181,34 +199,18 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12">
             <MapPin className="w-12 h-12 mx-auto mb-4 text-slate-600" />
-            <h3 className="text-lg text-slate-300 mb-2">
-              {events.length === 0 ? 'Nenhum evento encontrado' : 'Nenhum resultado encontrado'}
-            </h3>
-            <p className="text-slate-400">
-              {events.length === 0 
-                ? 'Não há eventos nas últimas 48 horas.'
-                : 'Tente ajustar os filtros de busca.'
-              }
-            </p>
+            <h3 className="text-lg text-slate-300 mb-2">Nenhum resultado encontrado</h3>
+            <p className="text-slate-400">Tente ajustar os filtros de busca.</p>
           </div>
         ) : (
           <>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <p className="text-sm text-slate-400">
-                Mostrando {filteredEvents.length} de {events.length} eventos
-              </p>
-              <div className="text-xs text-slate-500">
-                Ordenado por: {sortBy === 'date' ? 'Data' : sortBy === 'title' ? 'Nome' : 'Tipo'}
-              </div>
-            </div>
+            <p className="text-sm text-slate-400">
+              Mostrando {filteredEvents.length} de {events.length} eventos
+            </p>
 
             <div className="grid gap-4">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onClick={() => onEventClick(event)}
-                />
+              {filteredEvents.map(event => (
+                <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} />
               ))}
             </div>
           </>
