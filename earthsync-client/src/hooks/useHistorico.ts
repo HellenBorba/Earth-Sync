@@ -33,7 +33,7 @@ export function useHistorico() {
       await fetch(`${API_BASE_URL}/history`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: termo }),
+        body: JSON.stringify({ terms: [termo] }),
       });
       await fetchHistorico(); // update list
     } catch (error) {

@@ -27,7 +27,20 @@ export function SearchInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load search history from localStorage
+  // Salvando no banco
+  async function salvarNoBanco(query: string) {
+    try {
+      await fetch("http://localhost:5000/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+    } catch (error) {
+      console.error("Erro ao salvar histórico no banco:", error);
+    }
+  }
+
+  // Carregando histórico do localStorage
   useEffect(() => {
     try {
       const storedHistory = localStorage.getItem(storageKey);
@@ -39,7 +52,7 @@ export function SearchInput({
     }
   }, [storageKey]);
 
-  // Save search history to localStorage
+  // Salva o Histórico no localStorage
   const saveToHistory = (term: string) => {
     if (!term.trim() || term.length < 2) return;
 
@@ -49,7 +62,7 @@ export function SearchInput({
     ].slice(0, maxHistory);
 
     setSearchHistory(newHistory);
-    
+
     try {
       localStorage.setItem(storageKey, JSON.stringify(newHistory));
     } catch (error) {
@@ -57,7 +70,7 @@ export function SearchInput({
     }
   };
 
-  // Clear all history
+  // Limpa todo o histórico
   const clearHistory = () => {
     setSearchHistory([]);
     try {
@@ -67,12 +80,12 @@ export function SearchInput({
     }
   };
 
-  // Remove specific item from history
+  // Remove um item especifico do histórico
   const removeFromHistory = (term: string, event: React.MouseEvent) => {
     event.stopPropagation();
     const newHistory = searchHistory.filter(item => item !== term);
     setSearchHistory(newHistory);
-    
+
     try {
       localStorage.setItem(storageKey, JSON.stringify(newHistory));
     } catch (error) {
@@ -80,12 +93,11 @@ export function SearchInput({
     }
   };
 
-  // Filter history based on current input
   const filteredHistory = searchHistory.filter(item =>
     item.toLowerCase().includes(value.toLowerCase())
   );
 
-  // Handle click outside to close suggestions
+  // Handle click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -97,12 +109,13 @@ export function SearchInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle keyboard navigation
+  //  cuidado do teclado
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (!showSuggestions || filteredHistory.length === 0) {
-      // If Enter is pressed and there are no suggestions shown, save to history
+      // ENTER sem sugestões
       if (event.key === 'Enter' && value.trim()) {
         saveToHistory(value);
+        salvarNoBanco(value);   // 👉 ENVIA AO BANCO
         setShowSuggestions(false);
       }
       return;
@@ -111,27 +124,32 @@ export function SearchInput({
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        setFocusedIndex(prev => 
+        setFocusedIndex(prev =>
           prev < filteredHistory.length - 1 ? prev + 1 : prev
         );
         break;
+
       case 'ArrowUp':
         event.preventDefault();
         setFocusedIndex(prev => prev > 0 ? prev - 1 : -1);
         break;
+
       case 'Enter':
         event.preventDefault();
         if (focusedIndex >= 0 && focusedIndex < filteredHistory.length) {
           const selectedTerm = filteredHistory[focusedIndex];
           onChange(selectedTerm);
           saveToHistory(selectedTerm);
+          salvarNoBanco(selectedTerm);  // 👉 ENVIA AO BANCO
           setShowSuggestions(false);
           setFocusedIndex(-1);
         } else if (value.trim()) {
           saveToHistory(value);
+          salvarNoBanco(value);  // 👉 ENVIA AO BANCO
           setShowSuggestions(false);
         }
         break;
+
       case 'Escape':
         setShowSuggestions(false);
         setFocusedIndex(-1);
@@ -139,7 +157,6 @@ export function SearchInput({
     }
   };
 
-  // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
     if (e.target.value.trim()) {
@@ -148,22 +165,20 @@ export function SearchInput({
     setFocusedIndex(-1);
   };
 
-  // Handle input focus
   const handleFocus = () => {
     if (searchHistory.length > 0) {
       setShowSuggestions(true);
     }
   };
 
-  // Handle suggestion click
   const handleSuggestionClick = (term: string) => {
     onChange(term);
     saveToHistory(term);
+    salvarNoBanco(term); // 👉 ENVIA AO BANCO
     setShowSuggestions(false);
     setFocusedIndex(-1);
   };
 
-  // Clear input
   const handleClear = () => {
     onChange('');
     inputRef.current?.focus();
@@ -171,10 +186,10 @@ export function SearchInput({
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Search Input */}
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        
+
         <Input
           ref={inputRef}
           type="text"
@@ -191,23 +206,21 @@ export function SearchInput({
           <button
             onClick={handleClear}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-            aria-label="Limpar pesquisa"
           >
             <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Suggestions Dropdown */}
       {showSuggestions && (filteredHistory.length > 0 || (!value && searchHistory.length > 0)) && (
         <Card className="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-lg border-slate-700/50 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          {/* Header */}
+
           <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700/50 bg-slate-800/30">
             <div className="flex items-center gap-2 text-slate-400 text-sm">
               <History className="w-3.5 h-3.5" />
               <span>Pesquisas recentes</span>
             </div>
-            
+
             {searchHistory.length > 0 && (
               <Button
                 variant="ghost"
@@ -221,23 +234,16 @@ export function SearchInput({
             )}
           </div>
 
-          {/* Suggestions List */}
           <div className="max-h-60 overflow-y-auto custom-scrollbar">
-            {(value ? filteredHistory : searchHistory).length === 0 && value && (
-              <div className="px-4 py-8 text-center">
-                <Search className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                <p className="text-sm text-slate-500">Nenhuma pesquisa anterior encontrada</p>
-              </div>
-            )}
-            
             {(value ? filteredHistory : searchHistory).map((term, index) => (
               <div
                 key={index}
                 className={`
                   flex items-center justify-between px-4 py-3 cursor-pointer transition-all duration-150
-                  ${focusedIndex === index 
-                    ? 'bg-blue-600/20 border-l-2 border-blue-500 pl-[14px]' 
-                    : 'hover:bg-slate-800/50 border-l-2 border-transparent'
+                  ${
+                    focusedIndex === index
+                      ? 'bg-blue-600/20 border-l-2 border-blue-500 pl-[14px]'
+                      : 'hover:bg-slate-800/50 border-l-2 border-transparent'
                   }
                 `}
                 onClick={() => handleSuggestionClick(term)}
@@ -251,8 +257,6 @@ export function SearchInput({
                 <button
                   onClick={(e) => removeFromHistory(term, e)}
                   className="ml-2 p-1 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors flex-shrink-0"
-                  aria-label={`Remover "${term}" do histórico`}
-                  title="Remover do histórico"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -260,16 +264,6 @@ export function SearchInput({
             ))}
           </div>
 
-          {/* Footer hint */}
-          {(value ? filteredHistory : searchHistory).length > 0 && (
-            <div className="px-4 py-2 bg-slate-800/30 border-t border-slate-700/50">
-              <p className="text-xs text-slate-500">
-                Use <kbd className="px-1 py-0.5 bg-slate-700/50 rounded text-slate-400">↑↓</kbd> para navegar, 
-                <kbd className="px-1 py-0.5 bg-slate-700/50 rounded text-slate-400 mx-1">Enter</kbd> para selecionar, 
-                <kbd className="px-1 py-0.5 bg-slate-700/50 rounded text-slate-400">Esc</kbd> para fechar
-              </p>
-            </div>
-          )}
         </Card>
       )}
     </div>

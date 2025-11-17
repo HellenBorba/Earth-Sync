@@ -1,28 +1,26 @@
-import express from 'express';
-import { setupSwagger } from './config/swagger';
+import express from "express";
 import cors from "cors";
-import eventsRouter from "./routes/events";  // apontando para events.ts
-import historyRouter from "./routes/history"; // apontando para history.ts
-import { PrismaClient } from "@prisma/client";
+import { setupSwagger } from "./config/swagger";
+import eventsRouter from "./routes/events";
+import historyRouter from "./routes/history";
+import { prisma } from "./prismaClient"; 
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-// Opcional: passar prisma para todas as rotas
 declare global {
   namespace Express {
     interface Request {
-      prisma?: PrismaClient;
+      prisma?: typeof prisma;
     }
   }
 }
 
 app.use((req, _res, next) => {
-  req.prisma = prisma;
+  req.prisma = prisma; 
   next();
 });
 
@@ -30,9 +28,11 @@ app.use((req, _res, next) => {
 app.use("/api/events", eventsRouter);
 app.use("/api/history", historyRouter);
 
+// Swagger
 setupSwagger(app);
 
+// Start do servidor
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(`Swagger disponível em http://localhost:${PORT}/api-docs`);
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  console.log(`📘 Swagger disponível em http://localhost:${PORT}/api-docs`);
 });
