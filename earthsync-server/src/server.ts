@@ -24,14 +24,14 @@ app.use((req, _res, next) => {
   next();
 });
 
-// Rotas
+// Routes
 app.use("/api/events", eventsRouter);
 app.use("/api/history", historyRouter);
 
 // Swagger
 setupSwagger(app);
 
-// Start do servidor
+// Server start
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
   console.log(`📘 Swagger disponível em http://localhost:${PORT}/api-docs`);

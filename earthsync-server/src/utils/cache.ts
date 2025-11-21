@@ -1,6 +1,6 @@
 import NodeCache from "node-cache";
 
-// Cria o cache com TTL padrão de 5 minutos
+// Create cache with default TTL of 5 minutes
 const cache: NodeCache = new NodeCache({ stdTTL: 300 });
 
 export default cache;

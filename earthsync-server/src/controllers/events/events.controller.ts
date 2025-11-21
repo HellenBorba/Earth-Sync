@@ -5,37 +5,37 @@ import { eventsService } from "../../services/events.service";
  * @swagger
  * tags:
  *   name: Events
- *   description: Operações relacionadas a eventos
+ *   description: Operations related to events
  */
 export const eventsController = {
   /**
    * @swagger
    * /api/events:
    *   get:
-   *     summary: Lista eventos
-   *     description: Retorna todos os eventos disponíveis, podendo filtrar por categoria e intervalo de datas.
+   *     summary: List events
+   *     description: Returns all available events, optionally filtered by category and date range.
    *     tags: [Events]
    *     parameters:
    *       - in: query
    *         name: category
    *         schema:
    *           type: string
-   *         description: Categoria do evento (opcional)
+   *         description: Event category (optional)
    *       - in: query
    *         name: start
    *         schema:
    *           type: string
    *           format: date
-   *         description: Data inicial do filtro (opcional)
+   *         description: Start date for filter (optional)
    *       - in: query
    *         name: end
    *         schema:
    *           type: string
    *           format: date
-   *         description: Data final do filtro (opcional)
+   *         description: End date for filter (optional)
    *     responses:
    *       200:
-   *         description: Lista de eventos retornada com sucesso
+   *         description: List of events returned successfully
    *         content:
    *           application/json:
    *             schema:
@@ -46,7 +46,7 @@ export const eventsController = {
    *                   items:
    *                     $ref: '#/components/schemas/Event'
    *       500:
-   *         description: Erro interno no servidor
+   *         description: Internal server error
    */
   async getEvents(req: Request, res: Response) {
     try {
@@ -55,7 +55,7 @@ export const eventsController = {
       res.json(data);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Erro ao buscar eventos" });
+      res.status(500).json({ error: "Error fetching events" });
     }
   },
 
@@ -63,8 +63,8 @@ export const eventsController = {
    * @swagger
    * /api/events/{id}:
    *   get:
-   *     summary: Busca evento por ID
-   *     description: Retorna os detalhes de um evento específico.
+   *     summary: Get event by ID
+   *     description: Returns the details of a specific event.
    *     tags: [Events]
    *     parameters:
    *       - in: path
@@ -72,18 +72,18 @@ export const eventsController = {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID do evento
+   *         description: Event ID
    *     responses:
    *       200:
-   *         description: Evento retornado com sucesso
+   *         description: Event returned successfully
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/Event'
    *       404:
-   *         description: Evento não encontrado
+   *         description: Event not found
    *       500:
-   *         description: Erro interno no servidor
+   *         description: Internal server error
    */
   async getEventById(req: Request, res: Response) {
     try {
@@ -92,7 +92,7 @@ export const eventsController = {
       res.json(data);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Erro ao buscar detalhes do evento" });
+      res.status(500).json({ error: "Error fetching event details" });
     }
   },
 
@@ -100,8 +100,8 @@ export const eventsController = {
    * @swagger
    * /api/events/{id}/images:
    *   get:
-   *     summary: Lista imagens de um evento
-   *     description: Retorna as imagens relacionadas a um evento específico.
+   *     summary: List images for an event
+   *     description: Returns the images related to a specific event.
    *     tags: [Events]
    *     parameters:
    *       - in: path
@@ -109,10 +109,10 @@ export const eventsController = {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID do evento
+   *         description: Event ID
    *     responses:
    *       200:
-   *         description: Lista de imagens retornada com sucesso
+   *         description: List of images returned successfully
    *         content:
    *           application/json:
    *             schema:
@@ -140,7 +140,7 @@ export const eventsController = {
    *                     type: string
    *                     example: "NASA GIBS"
    *       500:
-   *         description: Erro interno no servidor
+   *         description: Internal server error
    */
   async getEventImages(req: Request, res: Response) {
     try {
@@ -149,6 +149,7 @@ export const eventsController = {
       res.json(images);
     } catch (err) {
       console.error(err);
+      // You could also do: res.status(500).json({ error: "Error fetching event images" });
       res.json([]);
     }
   },
