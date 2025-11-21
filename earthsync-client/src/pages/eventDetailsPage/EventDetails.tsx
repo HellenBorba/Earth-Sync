@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { useEventDetails } from '../../hooks/useEventDetails';
 import { formatDate } from '../../utils/formatDate';
 
-
 // cache for location names
 const cache = new Map<string, string>();
 
@@ -119,6 +118,8 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
   formatDate,
 } = useEventDetails({ event });
 
+const isClosed = event.status === 'closed';
+const isActive = !isClosed;
 
   // get color by event type
   const getEventTypeColor = (category: string) => {
@@ -430,42 +431,46 @@ export function EventDetails({ event, onBack }: EventDetailsProps) {
 
             {/* Status */}
             <Card
-              className={`${event.status === 'active'
-                ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30'
-                : 'bg-slate-900/50 border-slate-700/50'} p-6`}
-            >
-              <h3 className="text-lg text-white mb-4">Status do Evento</h3>
+  className={`${isClosed
+    ? 'bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30'
+    : 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30'} p-6`}
+>
+  <h3 className="text-lg text-white mb-4">Status do Evento</h3>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${event.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-slate-400'}`} />
-                  <span className={event.status === 'active' ? 'text-green-300' : 'text-slate-300'}>
-                    {event.status === 'active' ? 'Monitoramento Ativo'
-                      : event.status === 'closed' ? 'Evento Encerrado'
-                      : 'Em Observação'}
-                  </span>
-                </div>
+  <div className="space-y-4">
+    <div className="flex items-center gap-2">
+      <div
+        className={`w-2 h-2 rounded-full ${
+          isClosed ? 'bg-red-400' : 'bg-green-400 animate-pulse'
+        }`}
+      />
+      <span className={isClosed ? 'text-red-300' : 'text-green-300'}>
+        {isClosed ? 'Evento Encerrado' : 'Monitoramento Ativo'}
+      </span>
+    </div>
 
-                <Separator className="bg-slate-700/50" />
+    <Separator className="bg-slate-700/50" />
 
-                <div className="grid grid-cols-1 gap-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Última atualização:</span>
-                    <span className="text-white">{formatDate(coordinates[0]?.date || new Date().toISOString())}</span>
-                  </div>
+    <div className="grid grid-cols-1 gap-3 text-sm">
+      <div className="flex justify-between">
+        <span className="text-slate-400">Última atualização:</span>
+        <span className="text-white">
+          {formatDate(coordinates[0]?.date || new Date().toISOString())}
+        </span>
+      </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Próxima verificação:</span>
-                    <span className="text-white">Em tempo real</span>
-                  </div>
+      <div className="flex justify-between">
+        <span className="text-slate-400">Próxima verificação:</span>
+        <span className="text-white">Em tempo real</span>
+      </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Localizações registradas:</span>
-                    <span className="text-white">{coordinates.length}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+      <div className="flex justify-between">
+        <span className="text-slate-400">Localizações registradas:</span>
+        <span className="text-white">{coordinates.length}</span>
+      </div>
+    </div>
+  </div>
+</Card>
           </div>
         </div>
       </div>
