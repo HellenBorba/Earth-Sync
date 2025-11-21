@@ -4,6 +4,8 @@ import { MapPin, Eye } from 'lucide-react';
 import { Button } from '../../components/atoms/button';
 import { Card } from '../../components/atoms/card';
 import { renderMapMarkers } from '../../utils/mapMarkers';
+import { tCategory } from "../../utils/categoryTranslator";
+
 
 interface GlobalMapOverviewProps {
   events: Event[];
@@ -93,27 +95,32 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
         </div>
 
         {/* Legend */}
-        <div className="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-slate-700/50 max-w-[140px] sm:max-w-none">
-          <div className="text-xs text-slate-300 mb-2 hidden sm:block">Tipos de Eventos:</div>
-          <div className="grid grid-cols-2 gap-1 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500"></div>
-              <span className="text-slate-400 text-xs">Incêndios</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500"></div>
-              <span className="text-slate-400 text-xs">Tempestades</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500"></div>
-              <span className="text-slate-400 text-xs">Terremotos</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-500"></div>
-              <span className="text-slate-400 text-xs">Inundações</span>
-            </div>
-          </div>
-        </div>
+<div className="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-slate-700/50 max-w-[140px] sm:max-w-none">
+  <div className="text-xs text-slate-300 mb-2 hidden sm:block">Tipos de Eventos:</div>
+
+  <div className="grid grid-cols-2 gap-1 text-xs">
+    <div className="flex items-center gap-1">
+      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500"></div>
+      <span className="text-slate-400 text-xs">Incêndios</span>
+    </div>
+
+    <div className="flex items-center gap-1">
+      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-purple-500"></div>
+      <span className="text-slate-400 text-xs">Tempestades</span>
+    </div>
+
+    <div className="flex items-center gap-1">
+      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500"></div>
+      <span className="text-slate-400 text-xs">Terremotos</span>
+    </div>
+
+    <div className="flex items-center gap-1">
+      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-500"></div>
+      <span className="text-slate-400 text-xs">Inundações</span>
+    </div>
+  </div>
+</div>
+
 
         {/* Stats overlay */}
         <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-slate-700/50">

@@ -26,6 +26,47 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Event, SatelliteImage } from "./types/event";
+import { tCategory } from "./utils/categoryTranslator";
+
+// Translate titles of events from English to Portuguese
+function translateEventTitle(title: string): string {
+  let translatedTitle = title;
+
+  translatedTitle = translatedTitle
+    .replace(/\bTropical Storm(s)?\b/gi, 'Tempestade Tropical')
+    .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
+    .replace(/\bSevere Storm(s)?\b/gi, 'Tempestade Severa')
+    .replace(/\bSea and Lake Ice\b/gi, 'Gelo Marinho e Lacustre')
+    .replace(/\bDust and Haze\b/gi, 'Névoa e Poeira')
+    .replace(/\bTemperature Extremes?\b/gi, 'Temperatura Extrema')
+    .replace(/\bWildfire(s)?\b/gi, 'Incêndio Florestal')
+    .replace(/\bPrescribed Fire(s)?\b/gi, 'Queima Controlada')
+    .replace(/\bFire(s)?\b/gi, 'Incêndio')
+    .replace(/\bFlood(s)?\b/gi, 'Inundação')
+    .replace(/\bEarthquake(s)?\b/gi, 'Terremoto')
+    .replace(/\bVolcano(es)?\b/gi, 'Vulcão')
+    .replace(/\bDrought(s)?\b/gi, 'Seca')
+    .replace(/\bSnow(s)?\b/gi, 'Nevasca')
+    .replace(/\bLandslide(s)?\b/gi, 'Deslizamento de Terra')
+    .replace(/\bManmade\b/gi, 'Causado por Humanos');
+
+  // Rearranges to "Fire in X", "Storm in X", etc.
+  const match = translatedTitle.match(
+    /^(.*?)(Incêndio|Queima Controlada|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento)(.*)$/i
+  );
+
+  if (match) {
+    const before = match[1].trim().replace(/^[,.\s]+/, '').replace(/[,.\s]+$/, '');
+    const disaster = match[2].trim();
+    const after = match[3].trim().replace(/^[,.\s]+/, '');
+
+    if (before) {
+      translatedTitle = `${disaster} em ${before}${after ? ', ' + after : ''}`;
+    }
+  }
+
+  return translatedTitle;
+}
 
 export default function App() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -401,17 +442,19 @@ export default function App() {
                           }
                         >
                           <div className="text-white text-sm font-medium truncate">
-                            {event.title}
-                          </div>
-                          <div className="text-slate-400 text-xs mt-1">
-                            {event.categories[0]?.title} •{" "}
-                            {new Date(
-                              event.geometry[0]?.date || "",
-                            ).toLocaleTimeString("pt-BR", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
+  {translateEventTitle(event.title)}
+</div>
+<div className="text-slate-400 text-xs mt-1">
+  {tCategory(event.categories[0]?.title || '')} •{" "}
+  {new Date(
+    event.geometry[0]?.date || "",
+  ).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</div>
+
+
                         </div>
                       ))}
                     </div>

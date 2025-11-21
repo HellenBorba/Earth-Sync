@@ -1,6 +1,7 @@
-import { Event } from '../types/event';
+import { Event } from '../../types/event';
 import { MapPin } from 'lucide-react';
 import { getMarkerColor, normalizeCoordinate } from '../../utils/mapMarkers';
+import { tCategory } from "../../utils/categoryTranslator";
 
 interface MapViewProps {
   events: Event[];
@@ -104,7 +105,7 @@ export function MapView({ events, selectedEvent, onEventSelect }: MapViewProps) 
           {Array.from(new Set(events.map(e => e.categories[0]?.title).filter(Boolean))).slice(0, 6).map(category => (
             <div key={category} className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${getMarkerColor(category)}`} />
-              <span className="text-slate-400 truncate">{category}</span>
+              <span className="text-slate-400 truncate">{tCategory(category)}</span>
             </div>
           ))}
         </div>

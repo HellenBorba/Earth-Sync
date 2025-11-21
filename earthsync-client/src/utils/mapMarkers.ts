@@ -1,5 +1,6 @@
 
 import { Event } from "../types/event";
+import { tCategory } from "./categoryTranslator";
 
 export function getEventColor(category?: string): string {
   switch (category) {
@@ -49,22 +50,24 @@ export function renderMapMarkers(mapElement: HTMLDivElement, events: Event[], on
 }
 
 export function getMarkerColor(category: string): string {
+  const catPt = tCategory(category);
   const colors: Record<string, string> = {
-    "Wildfires": "bg-red-500",
-    "Severe Storms": "bg-purple-500",
-    "Volcanoes": "bg-orange-500",
-    "Earthquakes": "bg-yellow-500",
-    "Floods": "bg-blue-500",
-    "Droughts": "bg-amber-500",
-    "Dust and Haze": "bg-gray-500",
-    "Snow": "bg-cyan-500",
-    "Water Color": "bg-teal-500",
-    "Landslides": "bg-stone-500",
-    "Manmade": "bg-rose-500",
-    "Sea and Lake Ice": "bg-indigo-500",
-    "Temperature Extremes": "bg-pink-500",
+    "Incêndios": "bg-red-500",
+    "Tempestades Severas": "bg-purple-500",
+    "Vulcões": "bg-orange-500",
+    "Terremotos": "bg-yellow-500",
+    "Inundações": "bg-blue-500",
+    "Seca": "bg-amber-500",
+    "Névoa e Poeira": "bg-gray-500",
+    "Nevasca": "bg-cyan-500",
+    "Cor da Água": "bg-teal-500",
+    "Deslizamento de Terra": "bg-stone-500",
+    "Causado por Humanos": "bg-rose-500",
+    "Gelo Marinho e Lacustre": "bg-indigo-500",
+    "Temperatura Extrema": "bg-pink-500",
   };
-  return colors[category] || "bg-slate-500";
+
+  return colors[catPt] || "bg-slate-500";
 }
 
 export function normalizeCoordinate(value: number, min: number, max: number) {
