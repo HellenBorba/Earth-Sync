@@ -1,6 +1,6 @@
 import { Card } from '../atoms/card';
 import { Badge } from '../atoms/badge';
-import { MapPin, Calendar, Zap, Clock, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '../atoms/button';
 import { Event } from '../../types/event';
 import { ImageWithFallback } from '../atoms/ImageWithFallback';
@@ -10,8 +10,6 @@ interface EventCardProps {
   event: Event;
   onClick?: () => void;
   showImage?: boolean;
-  showSeverityBadge?: boolean;
-  showAffectedArea?: boolean;
 }
 
 const eventTypeColors: Record<string, string> = {
@@ -33,9 +31,7 @@ const eventTypeColors: Record<string, string> = {
 export function EventCard({
   event,
   onClick,
-  showImage = true,
-  showSeverityBadge = false,
-  showAffectedArea = false
+  showImage = true
 }: EventCardProps) {
   const imageUrl = event.images?.[0]?.url || '/images/placeholder-400x200.png';
 
@@ -77,9 +73,9 @@ export function EventCard({
 
   const translatedCategory = tCategory(event.categories[0]?.title || '');
 
-     let translatedTitle = event.title;
+  let translatedTitle = event.title;
 
-  // Disaster keyword translation
+  // Tradução das palavras-chave de desastre
   translatedTitle = translatedTitle
     .replace(/\bTropical Storm(s)?\b/gi, 'Tempestade Tropical')
     .replace(/\bTropical Cyclone(s)?\b/gi, 'Ciclone Tropical')
@@ -98,7 +94,7 @@ export function EventCard({
     .replace(/\bLandslide(s)?\b/gi, 'Deslizamento de Terra')
     .replace(/\bManmade\b/gi, 'Causado por Humanos');
 
-  // Reorganizes for "Fire in X" or "Storm in X"
+  // Reorganiza para "Incêndio em X"
   const match = translatedTitle.match(
     /^(.*?)(Incêndio|Queima Controlada|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento)(.*)$/i
   );
@@ -111,8 +107,6 @@ export function EventCard({
       translatedTitle = `${disaster} em ${before}${after ? ', ' + after : ''}`;
     }
   }
-
-
 
   return (
     <Card
@@ -128,22 +122,10 @@ export function EventCard({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
-          {/* Translated category */}
+          {/* Categoria traduzida */}
           <Badge className={`absolute top-3 left-3 ${getEventTypeColor()}`}>
             {translatedCategory}
           </Badge>
-
-          {showSeverityBadge && event.severity && (
-            <Badge className="absolute top-3 right-3 bg-slate-900/80 text-white border-slate-600">
-              {event.severity === 'low'
-                ? 'Baixa'
-                : event.severity === 'medium'
-                ? 'Média'
-                : event.severity === 'high'
-                ? 'Alta'
-                : 'Crítica'}
-            </Badge>
-          )}
 
           <Button
             size="sm"
@@ -178,9 +160,6 @@ export function EventCard({
             <MapPin className="w-3 h-3 text-slate-400" />
             {getRegion()}
           </div>
-          {showAffectedArea && event.affectedArea && (
-            <div className="text-slate-400">Área afetada: {event.affectedArea}</div>
-          )}
         </div>
       </div>
     </Card>

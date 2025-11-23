@@ -256,8 +256,6 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
               event={event}
               onClick={() => onEventClick(event)}
               showImage={true}
-              showSeverityBadge={true}
-              showAffectedArea={true}
             />
           ))}
         </div>

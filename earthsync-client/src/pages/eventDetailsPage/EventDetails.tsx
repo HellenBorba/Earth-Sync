@@ -1,6 +1,6 @@
 import {
-  ArrowLeft, MapPin, Calendar, Globe, Zap,
-  ExternalLink, Share2, AlertTriangle, Activity, TrendingUp
+  ArrowLeft, MapPin, Calendar, Globe,
+  ExternalLink, Share2
 } from 'lucide-react';
 import { Button } from '../../components/atoms/button';
 import { Card } from '../../components/atoms/card';
@@ -9,22 +9,20 @@ import { Separator } from '../../components/atoms/separator';
 import { SatelliteImageCarousel } from './SatelliteImageCarousel';
 import { toast } from 'sonner';
 import { Event } from '../../types/event';
-import { SatelliteImage } from "../../types/event";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import { useEventDetails } from '../../hooks/useEventDetails';
 import { formatDate } from '../../utils/formatDate';
 
-// cache for location names
+// cache para nomes de localização
 const cache = new Map<string, string>();
 
-// display address from coordinates
 function LocationDisplay({ lat, lng }: { lat: number; lng: number }) {
-  const [address, setAddress] = useState<string>("Carregando localização...");
+  const [address, setAddress] = useState<string>('Carregando localização...');
 
   useEffect(() => {
     async function fetchAddress() {
       if (!lat || !lng) {
-        setAddress("Coordenadas inválidas");
+        setAddress('Coordenadas inválidas');
         return;
       }
 
@@ -44,18 +42,18 @@ function LocationDisplay({ lat, lng }: { lat: number; lng: number }) {
           const { city, town, village, state, country } = data.address;
           const locationName = [city || town || village, state, country]
             .filter(Boolean)
-            .join(", ");
+            .join(', ');
 
-          const result = locationName || "Localização não encontrada";
+          const result = locationName || 'Localização não encontrada';
 
           cache.set(key, result);
           setAddress(result);
         } else {
-          setAddress("Localização não encontrada");
+          setAddress('Localização não encontrada');
         }
       } catch (error) {
-        console.error("Erro ao obter localização:", error);
-        setAddress("Erro ao obter localização");
+        console.error('Erro ao obter localização:', error);
+        setAddress('Erro ao obter localização');
       }
     }
 
@@ -69,13 +67,12 @@ function LocationDisplay({ lat, lng }: { lat: number; lng: number }) {
   );
 }
 
-// props for event details
 interface EventDetailsProps {
   event: Event;
   onBack: () => void;
 }
 
-// translate event titles to readable format
+// mesma função de tradução que você já tinha
 function translateEventTitle(title: string): string {
   let t = title;
 
@@ -108,20 +105,22 @@ function translateEventTitle(title: string): string {
   return t;
 }
 
-// main component for event details
-export function EventDetails({ event, onBack }: EventDetailsProps) { 
-
+export function EventDetails({ event, onBack }: EventDetailsProps) {
   const {
-  images,
-  loading,
-  coordinates,
-  formatDate,
-} = useEventDetails({ event });
+    images,
+    loading,
+    coordinates,
+    formatDate: formatDateFromHook,
+  } = useEventDetails({ event });
 
-const isClosed = event.status === 'closed';
-const isActive = !isClosed;
+  const isClosed = event.status === 'closed';
+  const isActive = !isClosed;
 
-  // get color by event type
+  const statusLabel = isClosed ? 'Evento Encerrado' : 'Monitoramento Ativo';
+  const statusColor = isClosed
+    ? 'bg-red-500/20 text-red-300 border-red-500/30'
+    : 'bg-green-500/20 text-green-300 border-green-500/30';
+
   const getEventTypeColor = (category: string) => {
     const colors: Record<string, string> = {
       'Wildfires': 'from-red-500/20 to-orange-500/20 border-red-500/50',
@@ -141,22 +140,10 @@ const isActive = !isClosed;
     return colors[category] || 'from-slate-500/20 to-gray-500/20 border-slate-500/50';
   };
 
-  // get all coordinates from event
-  const getAllCoordinates = () => {
-    if (!event.geometry) return [];
-    return event.geometry.map(geom => ({
-      lat: geom.coordinates[1],
-      lng: geom.coordinates[0],
-      date: geom.date
-    }));
-  };
-
-  //const coordinates = getAllCoordinates();
- const category = event.categories[0]?.title || 'Desconhecido';
- const translatedCategory = translateEventTitle(category);
+  const category = event.categories[0]?.title || 'Desconhecido';
+  const translatedCategory = translateEventTitle(category);
   const translatedTitle = translateEventTitle(event.title);
 
-  // share event url
   const handleShare = () => {
     const eventUrl = `${window.location.origin}${window.location.pathname}#/evento/${encodeURIComponent(event.id)}`;
     if (navigator.share) {
@@ -170,7 +157,6 @@ const isActive = !isClosed;
     }
   };
 
-  // copy text to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast.success('Link copiado para a área de transferência!', {
@@ -179,28 +165,6 @@ const isActive = !isClosed;
     }).catch(() => {
       toast.error('Não foi possível copiar o link.');
     });
-  };
-
-  // get color for severity
-  const getSeverityColor = (severity?: string) => {
-    const colors = {
-      'low': 'bg-green-500/20 text-green-300 border-green-500/30',
-      'medium': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-      'high': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-      'critical': 'bg-red-500/20 text-red-300 border-red-500/30',
-    };
-    return colors[severity as keyof typeof colors] || 'bg-slate-500/20 text-slate-300 border-slate-500/30';
-  };
-
-  // get icon for severity
-  const getSeverityIcon = (severity?: string) => {
-    switch (severity) {
-      case 'low': return <TrendingUp className="w-3 h-3" />;
-      case 'medium': return <Activity className="w-3 h-3" />;
-      case 'high': return <AlertTriangle className="w-3 h-3" />;
-      case 'critical': return <AlertTriangle className="w-3 h-3" />;
-      default: return <Zap className="w-3 h-3" />;
-    }
   };
 
   return (
@@ -220,18 +184,15 @@ const isActive = !isClosed;
 
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2 flex-wrap">
-              <Badge variant="outline" className={`${getSeverityColor(event.severity)}`}>
-                {getSeverityIcon(event.severity)}
-                {event.severity
-                  ? `Severidade ${event.severity === 'low'
-                    ? 'Baixa'
-                    : event.severity === 'medium'
-                      ? 'Média'
-                      : event.severity === 'high'
-                        ? 'Alta'
-                        : 'Crítica'}`
-                  : 'Evento Ativo'}
+              {/* Badge de status (ativo / encerrado) */}
+              <Badge
+                variant="outline"
+                className={`flex items-center gap-2 ${statusColor}`}
+              >
+                <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                {statusLabel}
               </Badge>
+
               <Badge
                 variant="outline"
                 className="bg-slate-800/50 text-slate-300 border-slate-600/50"
@@ -255,7 +216,7 @@ const isActive = !isClosed;
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Event Overview */}
+            {/* Overview */}
             <Card className={`bg-gradient-to-br ${getEventTypeColor(category)} backdrop-blur-sm border p-6`}>
               <div className="space-y-4">
                 <div className="flex items-start justify-between">
@@ -301,7 +262,7 @@ const isActive = !isClosed;
 
                     <div className="flex-1 pb-4">
                       <div className="text-white font-medium">
-                        {formatDate(coord.date)}
+                        {formatDateFromHook(coord.date)}
                       </div>
                       <LocationDisplay lat={coord.lat} lng={coord.lng} />
 
@@ -316,7 +277,7 @@ const isActive = !isClosed;
               </div>
             </Card>
 
-            {/* Satellite Images */}
+            {/* Satellite images */}
             <div>
               <h3 className="text-lg text-white mb-4">Imagens de Satélite</h3>
               {loading && <div className="text-slate-400">Carregando imagens...</div>}
@@ -328,7 +289,7 @@ const isActive = !isClosed;
               )}
             </div>
 
-            {/* Sources */}
+            {/* Fontes */}
             {event.sources && event.sources.length > 0 && (
               <Card className="bg-slate-900/50 border-slate-700/50 p-6">
                 <h3 className="text-lg text-white mb-4 flex items-center gap-2">
@@ -360,7 +321,7 @@ const isActive = !isClosed;
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Location Info */}
+            {/* Localização */}
             <Card className="bg-slate-900/50 border-slate-700/50 p-6">
               <h3 className="text-lg text-white mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
@@ -386,7 +347,7 @@ const isActive = !isClosed;
               </div>
             </Card>
 
-            {/* Categories */}
+            {/* Categorias */}
             <Card className="bg-slate-900/50 border-slate-700/50 p-6">
               <h3 className="text-lg text-white mb-4">Categorias</h3>
 
@@ -403,74 +364,44 @@ const isActive = !isClosed;
               </div>
             </Card>
 
-            {/* Impact Assessment */}
-            {(event.affectedArea || event.estimatedImpact) && (
-              <Card className="bg-slate-900/50 border-slate-700/50 p-6">
-                <h3 className="text-lg text-white mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  Avaliação de Impacto
-                </h3>
-
-                <div className="space-y-4">
-                  {event.affectedArea && (
-                    <div>
-                      <span className="text-slate-400 text-sm">Área Afetada:</span>
-                      <div className="text-white font-medium">{event.affectedArea}</div>
-                    </div>
-                  )}
-
-                  {event.estimatedImpact && (
-                    <div>
-                      <span className="text-slate-400 text-sm">Impacto Estimado:</span>
-                      <div className="text-white">{event.estimatedImpact}</div>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            )}
-
-            {/* Status */}
+            {/* Status do Evento */}
             <Card
-  className={`${isClosed
-    ? 'bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30'
-    : 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30'} p-6`}
->
-  <h3 className="text-lg text-white mb-4">Status do Evento</h3>
+              className={`${isActive
+                ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30'
+                : 'bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30'} p-6`}
+            >
+              <h3 className="text-lg text-white mb-4">Status do Evento</h3>
 
-  <div className="space-y-4">
-    <div className="flex items-center gap-2">
-      <div
-        className={`w-2 h-2 rounded-full ${
-          isClosed ? 'bg-red-400' : 'bg-green-400 animate-pulse'
-        }`}
-      />
-      <span className={isClosed ? 'text-red-300' : 'text-green-300'}>
-        {isClosed ? 'Evento Encerrado' : 'Monitoramento Ativo'}
-      </span>
-    </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                  <span className={isActive ? 'text-green-300' : 'text-red-300'}>
+                    {statusLabel}
+                  </span>
+                </div>
 
-    <Separator className="bg-slate-700/50" />
+                <Separator className="bg-slate-700/50" />
 
-    <div className="grid grid-cols-1 gap-3 text-sm">
-      <div className="flex justify-between">
-        <span className="text-slate-400">Última atualização:</span>
-        <span className="text-white">
-          {formatDate(coordinates[0]?.date || new Date().toISOString())}
-        </span>
-      </div>
+                <div className="grid grid-cols-1 gap-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Última atualização:</span>
+                    <span className="text-white">
+                      {formatDate(coordinates[0]?.date || new Date().toISOString())}
+                    </span>
+                  </div>
 
-      <div className="flex justify-between">
-        <span className="text-slate-400">Próxima verificação:</span>
-        <span className="text-white">Em tempo real</span>
-      </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Próxima verificação:</span>
+                    <span className="text-white">Em tempo real</span>
+                  </div>
 
-      <div className="flex justify-between">
-        <span className="text-slate-400">Localizações registradas:</span>
-        <span className="text-white">{coordinates.length}</span>
-      </div>
-    </div>
-  </div>
-</Card>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Localizações registradas:</span>
+                    <span className="text-white">{coordinates.length}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </div>

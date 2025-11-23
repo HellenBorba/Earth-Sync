@@ -36,9 +36,6 @@ export interface Event {
   sources: EventSource[];
   geometry: EventGeometry[];
   status?: 'active' | 'closed' | 'monitoring';
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-  affectedArea?: string;
-  estimatedImpact?: string;
   images?: SatelliteImage[];
 }
 

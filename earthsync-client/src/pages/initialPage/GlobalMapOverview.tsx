@@ -4,8 +4,6 @@ import { MapPin, Eye } from 'lucide-react';
 import { Button } from '../../components/atoms/button';
 import { Card } from '../../components/atoms/card';
 import { renderMapMarkers } from '../../utils/mapMarkers';
-import { tCategory } from "../../utils/categoryTranslator";
-
 
 interface GlobalMapOverviewProps {
   events: Event[];
@@ -13,21 +11,23 @@ interface GlobalMapOverviewProps {
   onViewFullMap?: () => void;
 }
 
-export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: GlobalMapOverviewProps) {
+export function GlobalMapOverview({
+  events,
+  onEventSelect,
+  onViewFullMap,
+}: GlobalMapOverviewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
     renderMapMarkers(mapRef.current, events, onEventSelect || (() => {}));
+  }, [events, onEventSelect]);
 
-  }, [events]);
-
-
-  // compute severity stats
+  // compute severity stats (pode ser ajustado depois, se removermos "severity")
   const severityStats = {
-    high: events.filter(e => e.severity === 'high').length,
-    medium: events.filter(e => e.severity === 'medium').length,
-    low: events.filter(e => e.severity === 'low').length
+    high: events.filter((e) => e.severity === 'high').length,
+    medium: events.filter((e) => e.severity === 'medium').length,
+    low: events.filter((e) => e.severity === 'low').length,
   };
 
   return (
@@ -35,10 +35,14 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
       <div className="p-3 sm:p-4 border-b border-slate-700/50">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base sm:text-lg text-white mb-1">Panorama Global</h3>
-            <p className="text-slate-400 text-xs sm:text-sm">{events.length} eventos ativos detectados</p>
+            <h3 className="text-base sm:text-lg text-white mb-1">
+              Panorama Global
+            </h3>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {events.length} eventos ativos detectados
+            </p>
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -54,18 +58,26 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
 
       <div className="relative">
         {/* World Map Background */}
-        <div 
+        <div
           ref={mapRef}
           className="relative h-48 sm:h-56 lg:h-64 bg-gradient-to-br from-slate-800/50 to-slate-900/50 overflow-hidden"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 800 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 20 0 L 0 0 0 20' fill='none' stroke='%23334155' stroke-width='0.5' opacity='0.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`,
-            backgroundSize: '40px 40px'
+            backgroundSize: '40px 40px',
           }}
         >
           {/* Continents outline (simplified) */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 400">
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 800 400"
+          >
             {/* Very simplified world map outline */}
-            <g fill="none" stroke="#475569" strokeWidth="1" opacity="0.4">
+            <g
+              fill="none"
+              stroke="#475569"
+              strokeWidth="1"
+              opacity="0.4"
+            >
               {/* North America */}
               <path d="M120 80 L200 70 L220 120 L180 160 L120 140 Z" />
               {/* South America */}
@@ -83,69 +95,81 @@ export function GlobalMapOverview({ events, onEventSelect, onViewFullMap }: Glob
 
           {/* Coordinate grid */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="h-full w-full bg-gradient-to-r from-transparent via-blue-500/5 to-transparent"></div>
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent"></div>
+            <div className="h-full w-full bg-gradient-to-r from-transparent via-blue-500/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent" />
           </div>
 
           {/* Center crosshair */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-            <div className="w-4 h-4 border border-blue-400/30 rounded-full"></div>
-            <div className="absolute inset-0 w-4 h-4 border-t border-l border-blue-400/50 rounded-tl-full animate-spin" style={{ animationDuration: '8s' }}></div>
+            <div className="w-4 h-4 border border-blue-400/30 rounded-full" />
+            <div
+              className="absolute inset-0 w-4 h-4 border-t border-l border-blue-400/50 rounded-tl-full animate-spin"
+              style={{ animationDuration: '8s' }}
+            />
           </div>
         </div>
 
         {/* Legend */}
-<div className="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-slate-700/50 max-w-[140px] sm:max-w-none">
-  <div className="text-xs text-slate-300 mb-2 hidden sm:block">Tipos de Eventos:</div>
+        <div className="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-slate-700/50 max-w-[140px] sm:max-w-none">
+          <div className="text-xs text-slate-300 mb-2 hidden sm:block">
+            Tipos de Eventos:
+          </div>
 
-  <div className="grid grid-cols-2 gap-1 text-xs">
-    <div className="flex items-center gap-1">
-      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500"></div>
-      <span className="text-slate-400 text-xs">Incêndios</span>
-    </div>
+          <div className="grid grid-cols-2 gap-1 text-xs">
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500" />
+              <span className="text-slate-400 text-xs">Incêndios</span>
+            </div>
 
-    <div className="flex items-center gap-1">
-      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-purple-500"></div>
-      <span className="text-slate-400 text-xs">Tempestades</span>
-    </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500" />
+              <span className="text-slate-400 text-xs">Tempestades</span>
+            </div>
 
-    <div className="flex items-center gap-1">
-      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500"></div>
-      <span className="text-slate-400 text-xs">Terremotos</span>
-    </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500" />
+              <span className="text-slate-400 text-xs">Terremotos</span>
+            </div>
 
-    <div className="flex items-center gap-1">
-      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-500"></div>
-      <span className="text-slate-400 text-xs">Inundações</span>
-    </div>
-  </div>
-</div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-500" />
+              <span className="text-slate-400 text-xs">Inundações</span>
+            </div>
+          </div>
+        </div>
 
-
-        {/* Stats overlay */}
+        {/* Stats overlay (Severidade) */}
         <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-slate-700/50">
-          <div className="text-xs text-slate-300 mb-2 hidden sm:block">Severidade:</div>
+          <div className="text-xs text-slate-300 mb-2 hidden sm:block">
+            Severidade:
+          </div>
           <div className="space-y-1 text-xs">
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500"></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500" />
                 <span className="text-slate-400 text-xs">Alta</span>
               </div>
-              <span className="text-white text-xs">{severityStats.high}</span>
+              <span className="text-white text-xs">
+                {severityStats.high}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500"></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500" />
                 <span className="text-slate-400 text-xs">Média</span>
               </div>
-              <span className="text-white text-xs">{severityStats.medium}</span>
+              <span className="text-white text-xs">
+                {severityStats.medium}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500"></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500" />
                 <span className="text-slate-400 text-xs">Baixa</span>
               </div>
-              <span className="text-white text-xs">{severityStats.low}</span>
+              <span className="text-white text-xs">
+                {severityStats.low}
+              </span>
             </div>
           </div>
         </div>
