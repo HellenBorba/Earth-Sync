@@ -19,6 +19,30 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'type'>('date');
 
+  // ✅ remove acento + lowercase
+  const normalizeText = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+  // ✅ variações singular/plural (inclui caso "ões" -> "ão")
+  const buildSearchVariants = (term: string) => {
+    const n = normalizeText(term);
+    if (!n) return [];
+    const vars = new Set<string>();
+    vars.add(n);
+
+    if (n.endsWith("oes")) vars.add(n.replace(/oes$/, "ao"));
+    if (n.endsWith("ao")) vars.add(n.replace(/ao$/, "oes"));
+
+    if (n.endsWith("s")) vars.add(n.slice(0, -1));
+    else vars.add(n + "s");
+
+    return Array.from(vars).filter(v => v.length >= 2);
+  };
+
   // Get unique categories (translated)
   const categories = Array.from(
     new Set(events.flatMap(event =>
@@ -26,7 +50,6 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
     ))
   ).sort();
 
-  // 🔥 FUNCTION: translate title exactly like EventCard
   const translateTitle = (title: string) => {
     return title
       .replace(/\bTropical Storm(s)?\b/gi, 'Tempestade Tropical')
@@ -47,23 +70,28 @@ export function EventList({ events, onEventClick, isLoading }: EventListProps) {
       .replace(/\bManmade\b/gi, 'Causado por Humanos');
   };
 
-  // 🔥 Main filter logic (NOW works in Portuguese)
   const filteredEvents = events
     .filter(event => {
-      const translatedTitle = translateTitle(event.title).toLowerCase();
+      const translatedTitle = translateTitle(event.title);
       const translatedCategories = event.categories.map(cat =>
-        tCategory(cat.title).toLowerCase()
+        tCategory(cat.title)
       );
 
-      const search = searchTerm.toLowerCase();
+      const titleNorm = normalizeText(translatedTitle);
+      const categoriesNorm = translatedCategories.map(normalizeText);
+
+      const searchVariants = buildSearchVariants(searchTerm);
 
       const matchesSearch =
-        translatedTitle.includes(search) ||
-        translatedCategories.some(cat => cat.includes(search));
+        searchVariants.length === 0 ||
+        searchVariants.some(v =>
+          titleNorm.includes(v) ||
+          categoriesNorm.some(cat => cat.includes(v))
+        );
 
       const matchesCategory =
         selectedCategory === 'all' ||
-        translatedCategories.includes(selectedCategory.toLowerCase());
+        categoriesNorm.includes(normalizeText(selectedCategory));
 
       return matchesSearch && matchesCategory;
     })

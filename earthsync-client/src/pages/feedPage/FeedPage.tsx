@@ -25,7 +25,7 @@ const ITEMS_PER_PAGE = 9;
 
 export function FeedPage({ events, onEventClick }: FeedPageProps) {
 
-    const { processedEvents, eventTypes, regions, categoryMapPtToEn } = useProcessedEvents(events);
+  const { processedEvents, eventTypes, regions, categoryMapPtToEn } = useProcessedEvents(events);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -34,16 +34,46 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
 
-   
-// filter events based on search, type, region and dates
+  // ✅ remove acento + lowercase
+  const normalizeText = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+  // ✅ gera variações singular/plural simples (inclui caso "ões" -> "ão")
+  const buildSearchVariants = (term: string) => {
+    const n = normalizeText(term);
+    if (!n) return [];
+    const vars = new Set<string>();
+    vars.add(n);
+
+    if (n.endsWith("oes")) vars.add(n.replace(/oes$/, "ao")); // inundações -> inundação
+    if (n.endsWith("ao")) vars.add(n.replace(/ao$/, "oes"));  // inundação -> inundações
+
+    if (n.endsWith("s")) vars.add(n.slice(0, -1)); // incêndios -> incêndio
+    else vars.add(n + "s");                        // incêndio -> incêndios
+
+    return Array.from(vars).filter(v => v.length >= 2);
+  };
+
+  // filter events based on search, type, region and dates
   const filteredEvents = useMemo(() => {
     let filtered = processedEvents;
 
-    if (searchTerm) {
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    // ✅ SEARCH (agora sem acento e com singular/plural)
+    const searchVariants = buildSearchVariants(searchTerm);
+
+    if (searchVariants.length > 0) {
+      filtered = filtered.filter(event => {
+        const titleNorm = normalizeText(event.title);
+        const descNorm = normalizeText(event.description || "");
+
+        return searchVariants.some(v =>
+          titleNorm.includes(v) || descNorm.includes(v)
+        );
+      });
     }
 
     if (selectedType !== 'all') {
@@ -259,7 +289,6 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
           ))}
         </div>
       )}
-
 
       {/* Pagination */}
       {totalPages > 1 && (
