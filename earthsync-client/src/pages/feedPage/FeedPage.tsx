@@ -124,9 +124,8 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
         </div>
 
         <Button
-          variant="outline"
           onClick={clearFilters}
-          className="text-[rgba(255,255,255,1)] hover:text-white border-slate-600/50 hover:border-slate-500 bg-[rgba(42,72,137,1)]"
+          className="bg-[rgba(42,72,137,1)] hover:bg-blue-700 text-white border border-slate-600/50"
         >
           Limpar Filtros
         </Button>
@@ -242,7 +241,7 @@ export function FeedPage({ events, onEventClick }: FeedPageProps) {
             </p>
             <Button
               onClick={clearFilters}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-[rgba(42,72,137,1)] hover:bg-blue-700 text-white"
             >
               Limpar Filtros
             </Button>

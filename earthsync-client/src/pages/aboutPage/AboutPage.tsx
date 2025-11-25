@@ -22,10 +22,7 @@ import { useExternalLink } from '../../hooks/useExternalLink';
 
 // about page displaying purpose, features, technologies, and credits
 export function AboutPage() {
-
   const { openExternalLink } = useExternalLink(); 
-  
- 
 
   return (
     <div className="space-y-8">
@@ -53,6 +50,7 @@ export function AboutPage() {
                 atualizadas sobre eventos naturais ao redor do mundo.
               </p>
             </div>
+
             {/* main action buttons */}
             <div className="flex flex-wrap gap-3">
               <Button 
@@ -63,9 +61,9 @@ export function AboutPage() {
                 Visitar NASA EONET
               </Button>
               
+              {/* padrão Dash */}
               <Button 
-                variant="outline"
-                className="text-[rgba(255,255,255,1)] border-slate-600 hover:bg-slate-800/50 bg-[rgba(42,72,137,1)]"
+                className="bg-[rgba(42,72,137,1)] hover:bg-blue-700 text-white"
                 onClick={() => window.open('https://github.com/', '_blank')}
               >
                 <Github className="w-4 h-4 mr-2" />
@@ -73,6 +71,7 @@ export function AboutPage() {
               </Button>
             </div>
           </div>
+
           {/* hero image */}
           <div className="relative">
             <ImageWithFallback
@@ -214,10 +213,12 @@ export function AboutPage() {
                   </Button>
                 </div>
                 <p className="text-slate-400 text-sm mb-3">{link.description}</p>
+
+                {/* ✅ TAMANHO INTEIRO IGUAL ANTES + cor padrão Dash */}
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full text-[rgba(255,255,255,1)] border-slate-600 hover:bg-slate-700/50 bg-[rgba(42,72,137,1)]"
+                  className="w-full text-white border-slate-600 bg-[rgba(42,72,137,1)] hover:bg-blue-700 hover:text-white"
                   onClick={() => window.open(link.url, '_blank')}
                 >
                   Acessar
