@@ -1,5 +1,3 @@
-//import HistoricoPesquisas from "./HistoricoPesquisas";
-
 import { getEvents } from "./services/api/events";
 import { useState, useEffect } from "react";
 import { EventList } from "./components/organisms/EventList";
@@ -51,6 +49,7 @@ function translateEventTitle(title: string): string {
     .replace(/\bManmade\b/gi, 'Causado por Humanos');
 
   // Rearranges to "Fire in X", "Storm in X", etc.
+  
   const match = translatedTitle.match(
     /^(.*?)(Incêndio|Queima Controlada|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento)(.*)$/i
   );
@@ -91,11 +90,9 @@ export default function App() {
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
-      // getEvents agora faz o trabalho pesado de buscar os detalhes
       const data = await getEvents({ includeImages: true });
-      // Isso já está correto:
       setEvents(data.events);
-      console.log("DADOS BRUTOS DO 1º EVENTO (APÓS DETALHE):", data.events[0]); // AGORA DEVE TER 'images'
+      console.log("DADOS BRUTOS DO 1º EVENTO (APÓS DETALHE):", data.events[0]);
     } catch (error) {
       setEvents([]);
     }

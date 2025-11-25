@@ -3,7 +3,7 @@ export interface EventGeometry {
   magnitudeUnit?: string;
   date: string;
   type: string;
-  coordinates: [number, number]; // [longitude, latitude]
+  coordinates: [number, number]; 
 }
 
 export interface EventCategory {
@@ -48,4 +48,5 @@ export interface EONETResponse {
 
 export interface EventsResult {
   events: Event[];
+  total?: number;
 }
