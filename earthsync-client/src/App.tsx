@@ -23,7 +23,7 @@ import {
   RefreshCw,
   AlertTriangle,
 } from "lucide-react";
-import { Event, SatelliteImage } from "./types/event";
+import { Event } from "./types/event";
 import { tCategory } from "./utils/categoryTranslator";
 
 // Translate titles of events from English to Portuguese
@@ -49,7 +49,6 @@ function translateEventTitle(title: string): string {
     .replace(/\bManmade\b/gi, 'Causado por Humanos');
 
   // Rearranges to "Fire in X", "Storm in X", etc.
-  
   const match = translatedTitle.match(
     /^(.*?)(Incêndio|Queima Controlada|Inundação|Terremoto|Vulcão|Tempestade|Ciclone|Seca|Nevasca|Deslizamento)(.*)$/i
   );
@@ -86,6 +85,25 @@ export default function App() {
     string | null
   >(null);
 
+  // ✅ QUICK STATS (Opção B) — dentro do App pra recalcular com events
+  const mainCats = new Set(["Wildfires", "Severe Storms", "Earthquakes"]);
+
+  const countWildfires = events.filter(e =>
+    e.categories?.some(c => c.title === "Wildfires")
+  ).length;
+
+  const countStorms = events.filter(e =>
+    e.categories?.some(c => c.title === "Severe Storms")
+  ).length;
+
+  const countQuakes = events.filter(e =>
+    e.categories?.some(c => c.title === "Earthquakes")
+  ).length;
+
+  const countOthers = events.filter(e =>
+    !e.categories?.some(c => mainCats.has(c.title))
+  ).length;
+
   // fetch events from api
   const fetchEvents = async () => {
     setIsLoading(true);
@@ -100,7 +118,7 @@ export default function App() {
     setIsLoading(false);
   };
 
-   // handle hash based routing
+  // handle hash based routing
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -309,13 +327,7 @@ export default function App() {
                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4">
                     <div className="p-3 sm:p-4 bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-lg backdrop-blur-sm">
                       <div className="text-xl sm:text-2xl text-white">
-                        {
-                          events.filter((e) =>
-                            e.categories.some(
-                              (c) => c.title === "Wildfires",
-                            ),
-                          ).length
-                        }
+                        {countWildfires}
                       </div>
                       <div className="text-xs sm:text-sm text-red-300">
                         Incêndios
@@ -324,14 +336,7 @@ export default function App() {
 
                     <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-lg backdrop-blur-sm">
                       <div className="text-xl sm:text-2xl text-white">
-                        {
-                          events.filter((e) =>
-                            e.categories.some(
-                              (c) =>
-                                c.title === "Severe Storms",
-                            ),
-                          ).length
-                        }
+                        {countStorms}
                       </div>
                       <div className="text-xs sm:text-sm text-blue-300">
                         Tempestades
@@ -340,13 +345,7 @@ export default function App() {
 
                     <div className="p-3 sm:p-4 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/20 rounded-lg backdrop-blur-sm">
                       <div className="text-xl sm:text-2xl text-white">
-                        {
-                          events.filter((e) =>
-                            e.categories.some(
-                              (c) => c.title === "Earthquakes",
-                            ),
-                          ).length
-                        }
+                        {countQuakes}
                       </div>
                       <div className="text-xs sm:text-sm text-yellow-300">
                         Terremotos
@@ -355,17 +354,7 @@ export default function App() {
 
                     <div className="p-3 sm:p-4 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-lg backdrop-blur-sm">
                       <div className="text-xl sm:text-2xl text-white">
-                        {
-                          events.filter((e) =>
-                            e.categories.some((c) =>
-                              [
-                                "Floods",
-                                "Volcanoes",
-                                "Landslides",
-                              ].includes(c.title),
-                            ),
-                          ).length
-                        }
+                        {countOthers}
                       </div>
                       <div className="text-xs sm:text-sm text-purple-300">
                         Outros
@@ -439,19 +428,17 @@ export default function App() {
                           }
                         >
                           <div className="text-white text-sm font-medium truncate">
-  {translateEventTitle(event.title)}
-</div>
-<div className="text-slate-400 text-xs mt-1">
-  {tCategory(event.categories[0]?.title || '')} •{" "}
-  {new Date(
-    event.geometry[0]?.date || "",
-  ).toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}
-</div>
-
-
+                            {translateEventTitle(event.title)}
+                          </div>
+                          <div className="text-slate-400 text-xs mt-1">
+                            {tCategory(event.categories[0]?.title || '')} •{" "}
+                            {new Date(
+                              event.geometry[0]?.date || "",
+                            ).toLocaleTimeString("pt-BR", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -528,5 +515,4 @@ export default function App() {
       <ResponsiveDemo>{appContent}</ResponsiveDemo>
     </>
   );
-
 }
